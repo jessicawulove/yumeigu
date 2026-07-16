@@ -26,7 +26,7 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-6">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-sm font-bold text-white">
             Y
           </div>
           <span className="text-lg font-semibold tracking-tight text-slate-900">
@@ -45,7 +45,7 @@ export default function Navbar() {
               href={item.href}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 pathname === item.href || (item.href === '/' && pathname === '')
-                  ? 'bg-blue-50 text-blue-600'
+                  ? 'bg-amber-50 text-amber-600'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
@@ -75,14 +75,14 @@ export default function Navbar() {
               placeholder="搜索智能体..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10"
+              className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/10"
             />
           </div>
         </form>
 
         {/* User Avatar */}
         <div className="flex shrink-0 items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-700 text-xs font-medium text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-medium text-white">
             管
           </div>
         </div>

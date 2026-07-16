@@ -55,8 +55,8 @@ function MarketplaceContent() {
               onClick={() => setActiveCategory(cat.id)}
               className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-150 ${
                 activeCategory === cat.id
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600'
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600'
               }`}
             >
               <span className="text-sm">{cat.icon}</span>

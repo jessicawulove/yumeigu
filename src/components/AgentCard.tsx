@@ -13,11 +13,11 @@ export default function AgentCard({ agent }: AgentCardProps) {
       <div className="group cursor-pointer rounded-xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
         {/* Icon & Name */}
         <div className="mb-3 flex items-start gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-2xl transition-colors group-hover:bg-blue-100">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-2xl transition-colors group-hover:bg-amber-100">
             {agent.icon}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-base font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+            <h3 className="truncate text-base font-semibold text-slate-900 group-hover:text-amber-600 transition-colors">
               {agent.name}
             </h3>
             <div className="mt-0.5 flex items-center gap-1.5">
@@ -51,7 +51,7 @@ export default function AgentCard({ agent }: AgentCardProps) {
             {agent.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600"
+                className="rounded-full bg-amber-50 px-2 py-0.5 text-xs text-amber-600"
               >
                 {tag}
               </span>

@@ -137,7 +137,7 @@ export default function AdminPage() {
           </div>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-600"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -196,7 +196,7 @@ export default function AdminPage() {
                   className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-slate-50/50"
                 >
                   {/* Icon */}
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xl">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-xl">
                     {agent.icon}
                   </div>
 
@@ -243,7 +243,7 @@ export default function AdminPage() {
                       className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                         agent.status === 'active'
                           ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
-                          : 'text-blue-600 hover:bg-blue-50'
+                          : 'text-amber-600 hover:bg-amber-50'
                       }`}
                     >
                       {agent.status === 'active' ? '下架' : '上架'}
@@ -304,7 +304,7 @@ export default function AdminPage() {
                       onClick={() => setForm((f) => ({ ...f, icon }))}
                       className={`flex h-10 w-10 items-center justify-center rounded-lg text-xl transition-all ${
                         form.icon === icon
-                          ? 'bg-blue-100 ring-2 ring-blue-500'
+                          ? 'bg-amber-100 ring-2 ring-amber-500'
                           : 'bg-slate-50 hover:bg-slate-100'
                       }`}
                     >
@@ -324,7 +324,7 @@ export default function AdminPage() {
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   placeholder="输入智能体名称"
-                  className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                  className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10"
                   required
                 />
               </div>
@@ -339,7 +339,7 @@ export default function AdminPage() {
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                   placeholder="描述智能体的功能"
                   rows={3}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10"
                   required
                 />
               </div>
@@ -352,7 +352,7 @@ export default function AdminPage() {
                 <select
                   value={form.category}
                   onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                  className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                  className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10"
                 >
                   {CATEGORIES.filter((c) => c.id !== 'all').map((cat) => (
                     <option key={cat.id} value={cat.id}>
@@ -372,7 +372,7 @@ export default function AdminPage() {
                   value={form.tags}
                   onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
                   placeholder="用逗号分隔，如：写作, 营销, 创意"
-                  className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                  className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10"
                 />
               </div>
 
@@ -386,7 +386,7 @@ export default function AdminPage() {
                   onChange={(e) => setForm((f) => ({ ...f, systemPrompt: e.target.value }))}
                   placeholder="定义智能体的角色和行为"
                   rows={3}
-                  className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition-all focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10"
                 />
               </div>
 
@@ -401,7 +401,7 @@ export default function AdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                  className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600"
                 >
                   {modalMode === 'create' ? '创建' : '保存'}
                 </button>

@@ -132,7 +132,7 @@ export default function ChatPage() {
             {/* Back Button */}
             <Link
               href="/"
-              className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-blue-600"
+              className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-amber-600"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -142,7 +142,7 @@ export default function ChatPage() {
 
             {/* Agent Info */}
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-3xl">
                 {agent.icon}
               </div>
               <div>
@@ -172,7 +172,7 @@ export default function ChatPage() {
                 {agent.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600"
+                    className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600"
                   >
                     {tag}
                   </span>
@@ -196,7 +196,7 @@ export default function ChatPage() {
         <div className="flex flex-1 flex-col">
           {/* Chat Header (mobile) */}
           <div className="flex items-center gap-3 border-b border-slate-200 bg-white px-6 py-3 lg:hidden">
-            <Link href="/" className="text-slate-500 hover:text-blue-600">
+            <Link href="/" className="text-slate-500 hover:text-amber-600">
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -224,7 +224,7 @@ export default function ChatPage() {
                       <button
                         key={prompt}
                         onClick={() => setInputValue(prompt)}
-                        className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                        className="rounded-full border border-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors hover:border-amber-200 hover:bg-amber-50 hover:text-amber-600"
                       >
                         {prompt}
                       </button>
@@ -243,8 +243,8 @@ export default function ChatPage() {
                     <div
                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm ${
                         msg.role === 'user'
-                          ? 'bg-gradient-to-br from-blue-500 to-blue-700 text-white'
-                          : 'bg-blue-50 text-lg'
+                          ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
+                          : 'bg-amber-50 text-lg'
                       }`}
                     >
                       {msg.role === 'user' ? '我' : agent.icon}
@@ -254,7 +254,7 @@ export default function ChatPage() {
                     <div
                       className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                         msg.role === 'user'
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-amber-500 text-white'
                           : 'border border-slate-100 bg-white text-slate-700'
                       }`}
                     >
@@ -266,7 +266,7 @@ export default function ChatPage() {
                 {/* Typing Indicator */}
                 {isTyping && (
                   <div className="flex gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-lg">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-50 text-lg">
                       {agent.icon}
                     </div>
                     <div className="rounded-2xl border border-slate-100 bg-white px-4 py-3">
@@ -294,13 +294,13 @@ export default function ChatPage() {
                   onKeyDown={handleKeyDown}
                   placeholder="输入消息... (Enter 发送, Shift+Enter 换行)"
                   rows={1}
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10"
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-amber-500 focus:bg-white focus:ring-2 focus:ring-amber-500/10"
                 />
               </div>
               <button
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isTyping}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white transition-all hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
