@@ -18,6 +18,7 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/', label: '智能体广场' },
+    { href: '/knowledge', label: '外贸知识库' },
     { href: '/admin', label: '管理后台' },
   ];
 

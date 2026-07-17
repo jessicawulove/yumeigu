@@ -20,14 +20,16 @@ src/
 │   ├── page.tsx                # 智能体广场首页
 │   ├── globals.css             # 全局样式 + CSS 变量
 │   ├── chat/[id]/page.tsx      # 智能体对话页面
+│   ├── knowledge/page.tsx      # 外贸知识库页面
 │   └── admin/page.tsx          # 管理后台
 ├── components/
 │   ├── ui/                     # shadcn/ui 组件库
 │   ├── Navbar.tsx              # 顶部导航栏
 │   └── AgentCard.tsx           # 智能体卡片组件
 └── lib/
-    ├── types.ts                # 类型定义 + 分类常量
-    ├── store.ts                # localStorage 数据层
+    ├── types.ts                # 类型定义 + 分类常量 + 知识库类型
+    ├── store.ts                # localStorage 数据层（智能体）
+    ├── knowledge-store.ts      # localStorage 数据层（知识库）
     └── utils.ts                # 工具函数
 ```
 
@@ -37,11 +39,13 @@ src/
 |------|------|------|
 | `/` | 智能体广场（分类筛选 + 卡片网格 + 搜索） | `src/app/page.tsx` |
 | `/chat/[id]` | 智能体对话（多轮对话 + 历史记录） | `src/app/chat/[id]/page.tsx` |
+| `/knowledge` | 外贸知识库（三栏布局：数据来源 + 核心能力 + 知识产出） | `src/app/knowledge/page.tsx` |
 | `/admin` | 管理后台（增删改查 + 上下架 + 数据统计） | `src/app/admin/page.tsx` |
 
 ## 数据层
 
-- `src/lib/store.ts`：封装 localStorage 操作，提供 CRUD API
+- `src/lib/store.ts`：封装 localStorage 操作，提供智能体 CRUD API
+- `src/lib/knowledge-store.ts`：知识库数据层，预设 14 条数据来源 + 16 条知识产出
 - 预设 10 个示例智能体，覆盖写作/营销/研发/运营/人事/财务/设计 7 个分类
 - 对话记录按 agentId 独立存储
 
