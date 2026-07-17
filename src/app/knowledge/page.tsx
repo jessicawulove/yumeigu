@@ -9,6 +9,7 @@ import {
   KnowledgeOutputItem,
 } from '@/lib/types';
 import { getSourceItems, getOutputItems, addSourceItem } from '@/lib/knowledge-store';
+import StrategyModal from '@/components/StrategyModal';
 import {
   Users,
   Mail,
@@ -42,6 +43,7 @@ import {
   Share2,
   ChevronRight,
   Inbox,
+  Sparkles,
 } from 'lucide-react';
 
 const SOURCE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -67,6 +69,7 @@ export default function KnowledgePage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newItem, setNewItem] = useState({ title: '', summary: '', tags: '' });
   const [mounted, setMounted] = useState(false);
+  const [strategyCustomer, setStrategyCustomer] = useState<DataSourceItem | null>(null);
 
   useEffect(() => {
     setSourceItems(getSourceItems());
@@ -232,22 +235,37 @@ export default function KnowledgePage() {
 
               <div className="space-y-2">
                 {filteredSourceItems.slice(0, 5).map((item) => (
-                  <button
+                  <div
                     key={item.id}
-                    onClick={() => handleSourceDetailClick(item.sourceId)}
-                    className="block w-full rounded-lg border border-slate-100 p-2.5 text-left transition-colors hover:border-amber-200 hover:bg-amber-50/30"
+                    className="group/item rounded-lg border border-slate-100 transition-colors hover:border-amber-200 hover:bg-amber-50/30"
                   >
-                    <p className="truncate text-xs font-medium text-slate-700">{item.title}</p>
-                    <p className="mt-0.5 truncate text-xs text-slate-400">{item.summary}</p>
-                    <div className="mt-1.5 flex items-center gap-1">
-                      {item.tags.slice(0, 2).map((tag) => (
-                        <span key={tag} className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
-                          {tag}
-                        </span>
-                      ))}
-                      <span className="ml-auto text-[10px] text-slate-400">{item.date}</span>
-                    </div>
-                  </button>
+                    <button
+                      onClick={() => handleSourceDetailClick(item.sourceId)}
+                      className="block w-full p-2.5 text-left"
+                    >
+                      <p className="truncate text-xs font-medium text-slate-700">{item.title}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-400">{item.summary}</p>
+                      <div className="mt-1.5 flex items-center gap-1">
+                        {item.tags.slice(0, 2).map((tag) => (
+                          <span key={tag} className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+                            {tag}
+                          </span>
+                        ))}
+                        <span className="ml-auto text-[10px] text-slate-400">{item.date}</span>
+                      </div>
+                    </button>
+                    {item.sourceId === 'customer' && (
+                      <div className="border-t border-slate-50 px-2.5 py-1.5">
+                        <button
+                          onClick={() => setStrategyCustomer(item)}
+                          className="flex w-full items-center justify-center gap-1 rounded-md bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-1 text-[10px] font-medium text-white transition-all hover:from-amber-600 hover:to-orange-600"
+                        >
+                          <Sparkles className="h-3 w-3" />
+                          生成开发策略
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ))}
                 {filteredSourceItems.length > 5 && (
                   <button
@@ -400,6 +418,14 @@ export default function KnowledgePage() {
           </div>
         </aside>
       </div>
+
+      {/* Strategy Modal */}
+      {strategyCustomer && (
+        <StrategyModal
+          customerItem={strategyCustomer}
+          onClose={() => setStrategyCustomer(null)}
+        />
+      )}
 
       {/* Detail Panel Overlay */}
       {detailPanel && (
