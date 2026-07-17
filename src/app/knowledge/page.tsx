@@ -41,10 +41,11 @@ import {
   GraduationCap,
   Share2,
   ChevronRight,
+  Inbox,
 } from 'lucide-react';
 
 const SOURCE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  Users, Mail, Linkedin, Package, Globe, FileText, Award,
+  Inbox, Package, Globe, Users, Mail, FileText, Award,
 };
 
 const OUTPUT_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
