@@ -151,53 +151,51 @@ export interface ZohoConfig {
   clientId: string;
   clientSecret: string;
   authToken: string;
-  connected: boolean;
-  lastSyncTime?: string;
 }
 
 export interface CRMContact {
   id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  company: string;
-  title: string;
-  country: string;
-  industry: string;
-  leadSource: string;
-  owner: string;
+  name: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  title?: string;
+  tags?: string[];
+  notes?: string;
+  owner?: string;
+  isActive?: boolean;
   createdAt: string;
-  lastActivity: string;
-  tags: string[];
-  notes: string;
+  updatedAt?: string;
 }
 
 export interface CRMDeal {
   id: string;
-  dealName: string;
-  contactId: string;
-  contactName: string;
-  amount: number;
-  currency: string;
-  stage: 'Qualification' | 'Needs Analysis' | 'Proposal' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
-  probability: number;
-  expectedCloseDate: string;
-  product: string;
-  owner: string;
+  name: string;
+  contactId?: string;
+  contactName?: string;
+  stage: 'qualification' | 'needs_analysis' | 'proposal' | 'negotiation' | 'closed_won' | 'closed_lost';
+  amount?: number;
+  probability?: number;
+  expectedCloseDate?: string;
+  owner?: string;
+  notes?: string;
   createdAt: string;
-  description: string;
+  updatedAt?: string;
 }
 
 export interface CRMLead {
   id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  company: string;
-  country: string;
-  status: 'New' | 'Contacted' | 'Qualified' | 'Unqualified';
-  leadSource: string;
-  owner: string;
+  name: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  source?: string;
+  status: 'new' | 'contacted' | 'qualified' | 'unqualified';
+  score?: number;
+  owner?: string;
+  notes?: string;
   createdAt: string;
-  score: number;
+  updatedAt?: string;
 }
