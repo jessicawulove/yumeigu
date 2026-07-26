@@ -20,6 +20,7 @@ export default function Navbar() {
     { href: '/', label: '智能体广场' },
     { href: '/knowledge', label: '外贸知识库' },
     { href: '/crm', label: 'CRM' },
+    { href: '/blog', label: '博客' },
     { href: '/admin', label: '管理后台' },
   ];
 

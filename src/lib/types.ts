@@ -169,6 +169,30 @@ export interface CRMContact {
   updatedAt?: string;
 }
 
+// ==================== 博客类型 ====================
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  summary: string;
+  coverImage: string;
+  category: string;
+  tags: string[];
+  content: string;
+  author: string;
+  createdAt: string;
+  viewCount: number;
+}
+
+export const BLOG_CATEGORIES = [
+  '全部',
+  '产品动态',
+  '技术干货',
+  '行业洞察',
+  '案例分享',
+  '公司新闻',
+] as const;
+
 export interface CRMDeal {
   id: string;
   name: string;
