@@ -144,3 +144,60 @@ export const KNOWLEDGE_OUTPUTS: KnowledgeOutput[] = [
   { id: 'product-scripts', name: '产品卖点话术库', icon: 'Megaphone', description: '产品优势话术整理' },
   { id: 'market-strategy', name: '市场开发策略', icon: 'Target', description: '各市场开发策略方案' },
 ];
+
+// CRM Types (Zoho CRM)
+export interface ZohoConfig {
+  apiDomain: string;
+  clientId: string;
+  clientSecret: string;
+  authToken: string;
+  connected: boolean;
+  lastSyncTime?: string;
+}
+
+export interface CRMContact {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  company: string;
+  title: string;
+  country: string;
+  industry: string;
+  leadSource: string;
+  owner: string;
+  createdAt: string;
+  lastActivity: string;
+  tags: string[];
+  notes: string;
+}
+
+export interface CRMDeal {
+  id: string;
+  dealName: string;
+  contactId: string;
+  contactName: string;
+  amount: number;
+  currency: string;
+  stage: 'Qualification' | 'Needs Analysis' | 'Proposal' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
+  probability: number;
+  expectedCloseDate: string;
+  product: string;
+  owner: string;
+  createdAt: string;
+  description: string;
+}
+
+export interface CRMLead {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  company: string;
+  country: string;
+  status: 'New' | 'Contacted' | 'Qualified' | 'Unqualified';
+  leadSource: string;
+  owner: string;
+  createdAt: string;
+  score: number;
+}
