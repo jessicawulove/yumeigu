@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SupabaseConfigProvider } from '@/lib/supabase-config-inject';
+import { AuthProvider } from '@/lib/auth-context';
 
 export const metadata: Metadata = {
   title: 'YUMEIGU 智能体工具箱',
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
         <SupabaseConfigProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </SupabaseConfigProvider>
       </body>
     </html>

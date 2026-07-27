@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseConfig } from '@/lib/supabase-config-inject';
 import { getSupabaseBrowserClientWithRetry } from '@/lib/supabase-browser';
 import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoading, error: configError } = useSupabaseConfig();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -17,6 +18,23 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'error' | 'success'>('error');
+
+  // 如果已登录，自动跳转
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const supabase = await getSupabaseBrowserClientWithRetry();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const redirect = searchParams.get('redirect') || '/';
+          router.push(redirect);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    checkAuth();
+  }, [router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,8 +62,19 @@ export default function LoginPage() {
           return;
         }
 
-        if (data.session) {
-          router.push('/');
+        if (data.session && data.user) {
+          // 确保 user_roles 中有记录（登录时补录）
+          await supabase.from('user_roles').upsert(
+            {
+              user_id: data.user.id,
+              email: data.user.email || email,
+              full_name: data.user.user_metadata?.full_name || email.split('@')[0],
+            },
+            { onConflict: 'user_id', ignoreDuplicates: false }
+          );
+
+          const redirect = searchParams.get('redirect') || '/';
+          router.push(redirect);
         }
       } else {
         if (password !== confirmPassword) {
@@ -82,11 +111,23 @@ export default function LoginPage() {
           return;
         }
 
-        if (data.session) {
-          router.push('/');
+        if (data.session && data.user) {
+          // 注册成功，自动创建 user_roles 记录
+          // 触发器 auto_set_first_admin 会自动将第一个用户设为 admin
+          await supabase.from('user_roles').upsert(
+            {
+              user_id: data.user.id,
+              email: data.user.email || email,
+              full_name: email.split('@')[0],
+            },
+            { onConflict: 'user_id' }
+          );
+
+          const redirect = searchParams.get('redirect') || '/';
+          router.push(redirect);
         } else {
           setMessageType('success');
-          setMessage('注册成功，请查收验证邮件');
+          setMessage('注册成功，请查收验证邮件后登录');
         }
       }
     } catch (err) {

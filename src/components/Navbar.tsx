@@ -3,17 +3,26 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useAuth } from '@/lib/auth-context';
+import { LogOut, ShieldCheck, Users } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { authUser, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push('/login');
   };
 
   const navItems = [
@@ -24,6 +33,10 @@ export default function Navbar() {
     { href: '/blog', label: '博客' },
     { href: '/admin', label: '管理后台' },
   ];
+
+  const userInitial = authUser
+    ? (authUser.user.user_metadata?.full_name || authUser.user.email || '?').charAt(0).toUpperCase()
+    : '?';
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
@@ -84,11 +97,72 @@ export default function Navbar() {
           </div>
         </form>
 
-        {/* User Avatar */}
-        <div className="flex shrink-0 items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-amber-600 text-xs font-medium text-white">
-            管
-          </div>
+        {/* User Menu */}
+        <div className="relative flex shrink-0 items-center">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-50"
+          >
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium text-white ${
+              authUser?.role === 'admin'
+                ? 'bg-gradient-to-br from-amber-400 to-amber-600'
+                : 'bg-gradient-to-br from-slate-400 to-slate-500'
+            }`}>
+              {userInitial}
+            </div>
+            {authUser && (
+              <span className="hidden text-sm text-slate-600 md:inline">
+                {authUser.user.email?.split('@')[0]}
+              </span>
+            )}
+          </button>
+
+          {showUserMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-slate-200 bg-white py-2 shadow-lg">
+                {authUser && (
+                  <>
+                    <div className="border-b px-4 py-3">
+                      <p className="text-sm font-medium text-slate-900">
+                        {authUser.user.email}
+                      </p>
+                      <div className="mt-1 flex items-center gap-1">
+                        {authUser.role === 'admin' ? (
+                          <>
+                            <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
+                            <span className="text-xs text-amber-600">管理员</span>
+                          </>
+                        ) : (
+                          <>
+                            <Users className="h-3.5 w-3.5 text-slate-400" />
+                            <span className="text-xs text-slate-500">普通用户</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {authUser.role === 'admin' && (
+                      <Link
+                        href="/admin/users"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+                      >
+                        <ShieldCheck className="h-4 w-4" />
+                        用户权限管理
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      退出登录
+                    </button>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </header>
