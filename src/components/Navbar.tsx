@@ -43,7 +43,13 @@ export default function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-6">
         {/* Logo */}
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-sm font-bold text-white">
+          <img src="/logo.png" alt="钰美固" className="h-9 w-auto" onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            const fallback = target.nextElementSibling as HTMLElement;
+            if (fallback) fallback.style.display = 'flex';
+          }} />
+          <div className="hidden h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-sm font-bold text-white">
             Y
           </div>
           <span className="text-lg font-semibold tracking-tight text-slate-900">
