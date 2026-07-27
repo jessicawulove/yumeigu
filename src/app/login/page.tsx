@@ -35,7 +35,7 @@ function LoginForm() {
       getSupabaseBrowserClientWithRetry().then((supabase) => {
         supabase.auth.getSession().then(({ data: { session } }) => {
           if (session) {
-            const cb = searchParams.get('callback') || '/';
+            const cb = searchParams.get('redirect') || '/';
             router.push(cb);
           }
         });
@@ -62,7 +62,9 @@ function LoginForm() {
           setMessage(error.message);
         }
       } else if (data.user) {
-        const cb = searchParams.get('callback') || '/';
+        // 等待 session cookie 设置完成
+        await new Promise((r) => setTimeout(r, 500));
+        const cb = searchParams.get('redirect') || '/';
         router.push(cb);
       }
     } catch {
@@ -112,7 +114,9 @@ function LoginForm() {
               body: JSON.stringify({ user_id: user.id, email: registerEmail, full_name: registerName }),
             });
           }
-          const cb = searchParams.get('callback') || '/';
+          // 等待 session cookie 设置完成
+          await new Promise((r) => setTimeout(r, 800));
+          const cb = searchParams.get('redirect') || '/';
           router.push(cb);
         }
       }
