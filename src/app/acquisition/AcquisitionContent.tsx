@@ -448,7 +448,29 @@ export default function AcquisitionPage() {
               </div>
               <div className="flex gap-3 pt-2">
                 <button onClick={() => setShowEmailConfig(false)} className="flex-1 rounded-lg border border-slate-700 py-2 font-semibold text-white hover:bg-slate-700 transition">取消</button>
-                <button onClick={() => { setShowEmailConfig(false); alert('邮件配置已保存'); }} className="flex-1 rounded-lg bg-amber-500 py-2 font-semibold text-slate-900 hover:bg-amber-600 transition">保存配置</button>
+                <button 
+                  onClick={async () => { 
+                    try {
+                      const res = await fetch('/api/email-config', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(emailConfig)
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        setShowEmailConfig(false);
+                        alert('邮件配置已保存到服务器');
+                      } else {
+                        alert('保存失败：' + (data.error || '未知错误'));
+                      }
+                    } catch (error) {
+                      alert('保存失败：' + error);
+                    }
+                  }} 
+                  className="flex-1 rounded-lg bg-amber-500 py-2 font-semibold text-slate-900 hover:bg-amber-600 transition"
+                >
+                  保存配置
+                </button>
               </div>
             </div>
           </div>
