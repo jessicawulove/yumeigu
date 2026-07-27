@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YUMEIGU 智能获客系统</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+*{font-family:'Inter','Noto Sans SC',sans-serif}
+.gold-gradient{background:linear-gradient(135deg,#F5A623 0%,#e8b923 50%,#F5A623 100%)}
+.gold-text{background:linear-gradient(135deg,#F5A623,#e8b923);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dark-glass{background:rgba(15,23,42,0.95);backdrop-filter:blur(10px)}
+.card-hover{transition:all 0.3s ease}
+.card-hover:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(245,166,35,0.15)}
+.progress-ring{transform:rotate(-90deg)}
+.sidebar-item:hover{background:rgba(245,166,35,0.1);border-left:3px solid #F5A623}
+.sidebar-item.active{background:rgba(245,166,35,0.15);border-left:3px solid #F5A623;color:#F5A623}
+.lead-score-high{background:linear-gradient(135deg,#10b981,#059669)}
+.lead-score-medium{background:linear-gradient(135deg,#F5A623,#d97706)}
+.lead-score-low{background:linear-gradient(135deg,#6b7280,#4b5563)}
+.timeline-line{position:absolute;left:24px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#F5A623,#e8b923)}
+.input-gold:focus{border-color:#F5A623;box-shadow:0 0 0 3px rgba(245,166,35,0.2)}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0f172a}
+::-webkit-scrollbar-thumb{background:#F5A623;border-radius:3px}
+.fade-in{animation:fadeIn 0.4s ease-in}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.notification-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;background:#ef4444;border-radius:50%;font-size:10px;display:flex;align-items:center;justify-content:center;color:white}
+</style>
+<base target="_blank">
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+<nav class="dark-glass border-b border-slate-700 sticky top-0 z-50">
+<div class="px-6 py-3 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 gold-gradient rounded-lg flex items-center justify-center font-bold text-slate-900 text-lg">Y</div>
+<div>
+<h1 class="font-bold text-lg tracking-tight">YUMEIGU <span class="gold-text">智能获客系统</span></h1>
+<p class="text-xs text-slate-400">Grind Smarter, Build Stronger</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative cursor-pointer">
+<i class="fas fa-bell text-slate-400 hover:text-amber-400 transition"></i>
+<span class="notification-badge">5</span>
+</div>
+<div class="flex items-center gap-3 bg-slate-800 rounded-full px-4 py-2 border border-slate-700">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-900 font-bold text-sm">管</div>
+<span class="text-sm font-medium">管理员</span>
+</div>
+</div>
+</div>
+</nav>
+
+<div class="flex">
+<aside class="w-64 bg-slate-800 border-r border-slate-700 min-h-screen sticky top-14">
+<div class="p-4">
+<div class="mb-6">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-3">获客引擎</p>
+<div class="space-y-1">
+<div class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm" onclick="switchTab('dashboard')">
+<i class="fas fa-chart-line w-5"></i> 数据总览
+</div>
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('leads')">
+<i class="fas fa-funnel-dollar w-5"></i> 线索池
+<span class="ml-auto bg-amber-500 text-slate-900 text-xs font-bold px-2 py-0.5 rounded-full">23</span>
+</div>
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('pipeline')">
+<i class="fas fa-project-diagram w-5"></i> 销售管道
+</div>
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('customers')">
+<i class="fas fa-users w-5"></i> 客户档案
+</div>
+</div>
+</div>
+<div class="mb-6">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-3">自动化</p>
+<div class="space-y-1">
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('sop')">
+<i class="fas fa-robot w-5"></i> 跟进SOP
+</div>
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('email')">
+<i class="fas fa-envelope w-5"></i> 邮件营销
+</div>
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('tasks')">
+<i class="fas fa-tasks w-5"></i> 任务中心
+<span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">7</span>
+</div>
+</div>
+</div>
+<div>
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-3">分析</p>
+<div class="space-y-1">
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('analytics')">
+<i class="fas fa-chart-pie w-5"></i> 转化分析
+</div>
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('reports')">
+</div>
+<div>
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 px-3">AI智能体</p>
+<div class="space-y-1">
+<div class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer text-sm text-slate-300" onclick="switchTab('agent')">
+<i class="fas fa-brain w-5"></i> Agent总控台
+<span class="ml-auto bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">6</span>
+</div>
+</div>
+</div>
+<div>
+<i class="fas fa-file-alt w-5"></i> 数据报表
+</div>
+</div>
+</div>
+</div>
+</aside>
+
+<main class="flex-1 p-6 overflow-auto" id="mainContent">
+
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboard" class="fade-in">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h2 class="text-2xl font-bold">数据总览</h2>
+<p class="text-slate-400 text-sm mt-1">实时追踪获客漏斗与成交转化</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:border-amber-500 transition">
+<i class="fas fa-sync-alt mr-2"></i>刷新数据
+</button>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm">
+<i class="fas fa-plus mr-2"></i>录入新线索
+</button>
+</div>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700 card-hover">
+<div class="flex justify-between items-start mb-3">
+<div><p class="text-slate-400 text-sm">本月新增线索</p><h3 class="text-2xl font-bold mt-1">156</h3></div>
+<div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center"><i class="fas fa-user-plus text-amber-400"></i></div>
+</div>
+<div class="flex items-center gap-2 text-sm"><span class="text-emerald-400"><i class="fas fa-arrow-up mr-1"></i>23%</span><span class="text-slate-500">较上月</span></div>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700 card-hover">
+<div class="flex justify-between items-start mb-3">
+<div><p class="text-slate-400 text-sm">有效线索率</p><h3 class="text-2xl font-bold mt-1">68.4%</h3></div>
+<div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center"><i class="fas fa-check-circle text-emerald-400"></i></div>
+</div>
+<div class="flex items-center gap-2 text-sm"><span class="text-emerald-400"><i class="fas fa-arrow-up mr-1"></i>5.2%</span><span class="text-slate-500">较上月</span></div>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700 card-hover">
+<div class="flex justify-between items-start mb-3">
+<div><p class="text-slate-400 text-sm">成交转化率</p><h3 class="text-2xl font-bold mt-1">12.8%</h3></div>
+<div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center"><i class="fas fa-handshake text-blue-400"></i></div>
+</div>
+<div class="flex items-center gap-2 text-sm"><span class="text-emerald-400"><i class="fas fa-arrow-up mr-1"></i>1.8%</span><span class="text-slate-500">较上月</span></div>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700 card-hover">
+<div class="flex justify-between items-start mb-3">
+<div><p class="text-slate-400 text-sm">本月成交金额</p><h3 class="text-2xl font-bold mt-1">$284K</h3></div>
+<div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center"><i class="fas fa-dollar-sign text-purple-400"></i></div>
+</div>
+<div class="flex items-center gap-2 text-sm"><span class="text-emerald-400"><i class="fas fa-arrow-up mr-1"></i>18.5%</span><span class="text-slate-500">较上月</span></div>
+</div>
+</div>
+
+<!-- Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+<div class="lg:col-span-2 bg-slate-800 rounded-xl p-5 border border-slate-700">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold">获客漏斗趋势</h3>
+<select class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-sm"><option>近30天</option><option>近90天</option><option>本年度</option></select>
+</div>
+<canvas id="funnelChart" height="120"></canvas>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">线索来源分布</h3>
+<canvas id="sourceChart" height="200"></canvas>
+</div>
+</div>
+
+<!-- Pipeline Overview -->
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700 mb-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold">销售管道概览</h3>
+<button class="text-amber-400 text-sm hover:text-amber-300" onclick="switchTab('pipeline')">查看详情 <i class="fas fa-arrow-right ml-1"></i></button>
+</div>
+<div class="grid grid-cols-5 gap-4">
+<div class="text-center">
+<div class="relative w-16 h-16 mx-auto mb-2">
+<svg class="w-16 h-16 progress-ring"><circle cx="32" cy="32" r="28" stroke="#1e293b" stroke-width="4" fill="none"/><circle cx="32" cy="32" r="28" stroke="#F5A623" stroke-width="4" fill="none" stroke-dasharray="175.9" stroke-dashoffset="35"/></svg>
+<span class="absolute inset-0 flex items-center justify-center font-bold text-lg">42</span>
+</div>
+<p class="text-sm text-slate-400">新线索</p><p class="text-xs text-slate-600 mt-1">$0</p>
+</div>
+<div class="text-center">
+<div class="relative w-16 h-16 mx-auto mb-2">
+<svg class="w-16 h-16 progress-ring"><circle cx="32" cy="32" r="28" stroke="#1e293b" stroke-width="4" fill="none"/><circle cx="32" cy="32" r="28" stroke="#3b82f6" stroke-width="4" fill="none" stroke-dasharray="175.9" stroke-dashoffset="70"/></svg>
+<span class="absolute inset-0 flex items-center justify-center font-bold text-lg">28</span>
+</div>
+<p class="text-sm text-slate-400">已联系</p><p class="text-xs text-slate-600 mt-1">$45K</p>
+</div>
+<div class="text-center">
+<div class="relative w-16 h-16 mx-auto mb-2">
+<svg class="w-16 h-16 progress-ring"><circle cx="32" cy="32" r="28" stroke="#1e293b" stroke-width="4" fill="none"/><circle cx="32" cy="32" r="28" stroke="#8b5cf6" stroke-width="4" fill="none" stroke-dasharray="175.9" stroke-dashoffset="105"/></svg>
+<span class="absolute inset-0 flex items-center justify-center font-bold text-lg">18</span>
+</div>
+<p class="text-sm text-slate-400">需求确认</p><p class="text-xs text-slate-600 mt-1">$120K</p>
+</div>
+<div class="text-center">
+<div class="relative w-16 h-16 mx-auto mb-2">
+<svg class="w-16 h-16 progress-ring"><circle cx="32" cy="32" r="28" stroke="#1e293b" stroke-width="4" fill="none"/><circle cx="32" cy="32" r="28" stroke="#06b6d4" stroke-width="4" fill="none" stroke-dasharray="175.9" stroke-dashoffset="140"/></svg>
+<span class="absolute inset-0 flex items-center justify-center font-bold text-lg">12</span>
+</div>
+<p class="text-sm text-slate-400">报价/谈判</p><p class="text-xs text-slate-600 mt-1">$380K</p>
+</div>
+<div class="text-center">
+<div class="relative w-16 h-16 mx-auto mb-2">
+<svg class="w-16 h-16 progress-ring"><circle cx="32" cy="32" r="28" stroke="#1e293b" stroke-width="4" fill="none"/><circle cx="32" cy="32" r="28" stroke="#10b981" stroke-width="4" fill="none" stroke-dasharray="175.9" stroke-dashoffset="160"/></svg>
+<span class="absolute inset-0 flex items-center justify-center font-bold text-lg">8</span>
+</div>
+<p class="text-sm text-slate-400">成交 won</p><p class="text-xs text-emerald-400 mt-1 font-semibold">$284K</p>
+</div>
+</div>
+</div>
+
+<!-- Recent Activity & Top Leads -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">最近动态</h3>
+<div class="space-y-4">
+<div class="flex gap-3 items-start">
+<div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-1"><i class="fas fa-check text-emerald-400 text-xs"></i></div>
+<div class="flex-1">
+<p class="text-sm"><span class="font-semibold">EuroFlooring GmbH</span> 已成交 — 研磨机LJ600V x3台</p>
+<p class="text-xs text-slate-500 mt-1">2小时前 · 成交金额 $18,500</p>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-1"><i class="fas fa-envelope text-blue-400 text-xs"></i></div>
+<div class="flex-1">
+<p class="text-sm"><span class="font-semibold">Gulf Construction LLC</span> 发送报价单 — 环氧材料27系列</p>
+<p class="text-xs text-slate-500 mt-1">4小时前 · 报价金额 $32,000</p>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-1"><i class="fas fa-star text-amber-400 text-xs"></i></div>
+<div class="flex-1">
+<p class="text-sm"><span class="font-semibold">AsiaFloor Partners</span> 线索评分升级至 92分 (高意向)</p>
+<p class="text-xs text-slate-500 mt-1">6小时前 · 自动触发SOP-3</p>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-1"><i class="fas fa-phone text-purple-400 text-xs"></i></div>
+<div class="flex-1">
+<p class="text-sm"><span class="font-semibold">African Industries</span> 完成首次视频验厂</p>
+<p class="text-xs text-slate-500 mt-1">昨天 · 评分: 78分</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold">高意向线索 TOP 5</h3>
+<span class="text-xs text-amber-400 cursor-pointer" onclick="switchTab('leads')">查看全部</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-900 font-bold text-sm">A</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between"><p class="font-semibold text-sm truncate">AsiaFloor Partners</p><span class="lead-score-high text-xs px-2 py-0.5 rounded-full text-white font-bold">92</span></div>
+<p class="text-xs text-slate-400 mt-0.5">新加坡 · 采购经理 · 研磨机+材料</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">G</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between"><p class="font-semibold text-sm truncate">Gulf Construction LLC</p><span class="lead-score-high text-xs px-2 py-0.5 rounded-full text-white font-bold">88</span></div>
+<p class="text-xs text-slate-400 mt-0.5">阿联酋 · 项目总监 · 环氧地坪材料</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">E</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between"><p class="font-semibold text-sm truncate">EuroFlooring GmbH</p><span class="lead-score-medium text-xs px-2 py-0.5 rounded-full text-white font-bold">85</span></div>
+<p class="text-xs text-slate-400 mt-0.5">德国 · 技术总监 · 研磨机+耗材</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm">M</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between"><p class="font-semibold text-sm truncate">Middle East Flooring</p><span class="lead-score-medium text-xs px-2 py-0.5 rounded-full text-white font-bold">81</span></div>
+<p class="text-xs text-slate-400 mt-0.5">沙特 · 采购主管 · 洗地机+培训</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center text-white font-bold text-sm">A</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between"><p class="font-semibold text-sm truncate">African Industries</p><span class="lead-score-medium text-xs px-2 py-0.5 rounded-full text-white font-bold">78</span></div>
+<p class="text-xs text-slate-400 mt-0.5">尼日利亚 · 总经理 · 全品类</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== LEADS POOL ===== -->
+<div id="leads" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">线索池</h2><p class="text-slate-400 text-sm mt-1">全渠道线索聚合与智能评分</p></div>
+<div class="flex gap-3">
+<div class="relative"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i><input type="text" placeholder="搜索客户/公司/国家..." class="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm w-64 input-gold focus:outline-none"></div>
+<button class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:border-amber-500 transition"><i class="fas fa-filter mr-2"></i>筛选</button>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>新增线索</button>
+</div>
+</div>
+<div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+<button class="px-4 py-1.5 bg-amber-500 text-slate-900 rounded-full text-sm font-semibold">全部线索 (156)</button>
+<button class="px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full text-sm hover:border-amber-500 transition">高意向 (23)</button>
+<button class="px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full text-sm hover:border-amber-500 transition">待跟进 (45)</button>
+<button class="px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full text-sm hover:border-amber-500 transition">已联系 (38)</button>
+<button class="px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full text-sm hover:border-amber-500 transition">沉睡线索 (28)</button>
+<button class="px-4 py-1.5 bg-slate-800 border border-slate-700 rounded-full text-sm hover:border-amber-500 transition">无效线索 (22)</button>
+</div>
+<div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+<table class="w-full text-sm">
+<thead class="bg-slate-900/50 text-slate-400">
+<tr><th class="px-4 py-3 text-left font-medium"><input type="checkbox" class="rounded bg-slate-700 border-slate-600"></th><th class="px-4 py-3 text-left font-medium">客户信息</th><th class="px-4 py-3 text-left font-medium">来源渠道</th><th class="px-4 py-3 text-left font-medium">意向产品</th><th class="px-4 py-3 text-left font-medium">评分</th><th class="px-4 py-3 text-left font-medium">阶段</th><th class="px-4 py-3 text-left font-medium">最近互动</th><th class="px-4 py-3 text-left font-medium">操作</th></tr>
+</thead>
+<tbody class="divide-y divide-slate-700/50">
+<tr class="hover:bg-slate-700/30 transition cursor-pointer">
+<td class="px-4 py-3"><input type="checkbox" class="rounded bg-slate-700 border-slate-600"></td>
+<td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-900 font-bold text-xs">A</div><div><p class="font-semibold">AsiaFloor Partners</p><p class="text-xs text-slate-400">Mr. Chen · 新加坡</p></div></div></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">LinkedIn</span></td>
+<td class="px-4 py-3 text-slate-300">研磨机LJ600V, 环氧材料</td>
+<td class="px-4 py-3"><span class="lead-score-high px-2 py-1 rounded-full text-white text-xs font-bold">92</span></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">需求确认</span></td>
+<td class="px-4 py-3 text-slate-400 text-xs">2小时前</td>
+<td class="px-4 py-3"><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-edit"></i></button><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-envelope"></i></button><button class="text-slate-400 hover:text-amber-400"><i class="fas fa-ellipsis-v"></i></button></td>
+</tr>
+<tr class="hover:bg-slate-700/30 transition cursor-pointer">
+<td class="px-4 py-3"><input type="checkbox" class="rounded bg-slate-700 border-slate-600"></td>
+<td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs">G</div><div><p class="font-semibold">Gulf Construction LLC</p><p class="text-xs text-slate-400">Ahmed Al-Rashid · 阿联酋</p></div></div></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">官网询盘</span></td>
+<td class="px-4 py-3 text-slate-300">环氧地坪27系列</td>
+<td class="px-4 py-3"><span class="lead-score-high px-2 py-1 rounded-full text-white text-xs font-bold">88</span></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-cyan-500/20 text-cyan-400 rounded text-xs">报价中</span></td>
+<td class="px-4 py-3 text-slate-400 text-xs">4小时前</td>
+<td class="px-4 py-3"><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-edit"></i></button><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-envelope"></i></button><button class="text-slate-400 hover:text-amber-400"><i class="fas fa-ellipsis-v"></i></button></td>
+</tr>
+<tr class="hover:bg-slate-700/30 transition cursor-pointer">
+<td class="px-4 py-3"><input type="checkbox" class="rounded bg-slate-700 border-slate-600"></td>
+<td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-xs">E</div><div><p class="font-semibold">EuroFlooring GmbH</p><p class="text-xs text-slate-400">Klaus Mueller · 德国</p></div></div></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-xs">展会</span></td>
+<td class="px-4 py-3 text-slate-300">研磨机LJ600V, 金刚石磨片</td>
+<td class="px-4 py-3"><span class="lead-score-medium px-2 py-1 rounded-full text-white text-xs font-bold">85</span></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">已成交</span></td>
+<td class="px-4 py-3 text-slate-400 text-xs">2小时前</td>
+<td class="px-4 py-3"><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-edit"></i></button><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-envelope"></i></button><button class="text-slate-400 hover:text-amber-400"><i class="fas fa-ellipsis-v"></i></button></td>
+</tr>
+<tr class="hover:bg-slate-700/30 transition cursor-pointer">
+<td class="px-4 py-3"><input type="checkbox" class="rounded bg-slate-700 border-slate-600"></td>
+<td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-xs">M</div><div><p class="font-semibold">Middle East Flooring</p><p class="text-xs text-slate-400">Omar Hassan · 沙特</p></div></div></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">Facebook</span></td>
+<td class="px-4 py-3 text-slate-300">洗地机X510, 培训服务</td>
+<td class="px-4 py-3"><span class="lead-score-medium px-2 py-1 rounded-full text-white text-xs font-bold">81</span></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">已联系</span></td>
+<td class="px-4 py-3 text-slate-400 text-xs">昨天</td>
+<td class="px-4 py-3"><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-edit"></i></button><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-envelope"></i></button><button class="text-slate-400 hover:text-amber-400"><i class="fas fa-ellipsis-v"></i></button></td>
+</tr>
+<tr class="hover:bg-slate-700/30 transition cursor-pointer">
+<td class="px-4 py-3"><input type="checkbox" class="rounded bg-slate-700 border-slate-600"></td>
+<td class="px-4 py-3"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center text-white font-bold text-xs">A</div><div><p class="font-semibold">African Industries</p><p class="text-xs text-slate-400">James Okonkwo · 尼日利亚</p></div></div></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">官网询盘</span></td>
+<td class="px-4 py-3 text-slate-300">全品类(研磨机+材料+耗材)</td>
+<td class="px-4 py-3"><span class="lead-score-medium px-2 py-1 rounded-full text-white text-xs font-bold">78</span></td>
+<td class="px-4 py-3"><span class="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">需求确认</span></td>
+<td class="px-4 py-3 text-slate-400 text-xs">昨天</td>
+<td class="px-4 py-3"><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-edit"></i></button><button class="text-slate-400 hover:text-amber-400 mr-2"><i class="fas fa-envelope"></i></button><button class="text-slate-400 hover:text-amber-400"><i class="fas fa-ellipsis-v"></i></button></td>
+</tr>
+</tbody>
+</table>
+<div class="px-4 py-3 border-t border-slate-700 flex items-center justify-between">
+<span class="text-xs text-slate-500">显示 1-5 共 156 条</span>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-slate-900 rounded text-xs text-slate-400 hover:text-white"><i class="fas fa-chevron-left"></i></button>
+<button class="px-3 py-1 bg-amber-500 text-slate-900 rounded text-xs font-bold">1</button>
+<button class="px-3 py-1 bg-slate-900 rounded text-xs text-slate-400 hover:text-white">2</button>
+<button class="px-3 py-1 bg-slate-900 rounded text-xs text-slate-400 hover:text-white">3</button>
+<button class="px-3 py-1 bg-slate-900 rounded text-xs text-slate-400 hover:text-white"><i class="fas fa-chevron-right"></i></button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== PIPELINE ===== -->
+<div id="pipeline" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">销售管道</h2><p class="text-slate-400 text-sm mt-1">可视化拖拽管理，追踪每个成交机会</p></div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:border-amber-500 transition"><i class="fas fa-calendar-alt mr-2"></i>本月视图</button>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>新增商机</button>
+</div>
+</div>
+<div class="grid grid-cols-5 gap-4 h-[600px] overflow-x-auto">
+<!-- Column 1 -->
+<div class="bg-slate-800 rounded-xl border border-slate-700 flex flex-col min-w-[240px]">
+<div class="p-3 border-b border-slate-700 flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-amber-500"></div><span class="font-semibold text-sm">新线索</span><span class="bg-slate-700 text-xs px-2 py-0.5 rounded-full">42</span></div><span class="text-xs text-slate-500">$0</span></div>
+<div class="p-2 flex-1 overflow-y-auto space-y-2">
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-amber-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">新加坡</span><span class="lead-score-high text-xs px-1.5 py-0.5 rounded text-white">92</span></div>
+<p class="font-semibold text-sm mb-1">AsiaFloor Partners</p><p class="text-xs text-slate-400 mb-2">研磨机LJ600V, 环氧材料</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-amber-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-900">管</div></div><span class="text-xs text-slate-500">2天前</span></div>
+</div>
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-amber-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">巴西</span><span class="lead-score-medium text-xs px-1.5 py-0.5 rounded text-white">65</span></div>
+<p class="font-semibold text-sm mb-1">South America Floors</p><p class="text-xs text-slate-400 mb-2">环氧材料27系列</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-blue-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-white">李</div></div><span class="text-xs text-slate-500">5天前</span></div>
+</div>
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-amber-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">印度</span><span class="lead-score-low text-xs px-1.5 py-0.5 rounded text-white">45</span></div>
+<p class="font-semibold text-sm mb-1">IndoFloor Tech</p><p class="text-xs text-slate-400 mb-2">金刚石磨片</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-emerald-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-white">王</div></div><span class="text-xs text-slate-500">1周前</span></div>
+</div>
+</div>
+</div>
+<!-- Column 2 -->
+<div class="bg-slate-800 rounded-xl border border-slate-700 flex flex-col min-w-[240px]">
+<div class="p-3 border-b border-slate-700 flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="font-semibold text-sm">已联系</span><span class="bg-slate-700 text-xs px-2 py-0.5 rounded-full">28</span></div><span class="text-xs text-slate-500">$45K</span></div>
+<div class="p-2 flex-1 overflow-y-auto space-y-2">
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-blue-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">沙特</span><span class="lead-score-medium text-xs px-1.5 py-0.5 rounded text-white">81</span></div>
+<p class="font-semibold text-sm mb-1">Middle East Flooring</p><p class="text-xs text-slate-400 mb-2">洗地机X510, 培训</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-amber-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-900">管</div></div><span class="text-xs text-blue-400">待回复</span></div>
+</div>
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-blue-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">澳大利亚</span><span class="lead-score-medium text-xs px-1.5 py-0.5 rounded text-white">72</span></div>
+<p class="font-semibold text-sm mb-1">AusFloor Solutions</p><p class="text-xs text-slate-400 mb-2">工业吸尘器LJ400</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-blue-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-white">李</div></div><span class="text-xs text-emerald-400">已回复</span></div>
+</div>
+</div>
+</div>
+<!-- Column 3 -->
+<div class="bg-slate-800 rounded-xl border border-slate-700 flex flex-col min-w-[240px]">
+<div class="p-3 border-b border-slate-700 flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-purple-500"></div><span class="font-semibold text-sm">需求确认</span><span class="bg-slate-700 text-xs px-2 py-0.5 rounded-full">18</span></div><span class="text-xs text-slate-500">$120K</span></div>
+<div class="p-2 flex-1 overflow-y-auto space-y-2">
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-purple-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">尼日利亚</span><span class="lead-score-medium text-xs px-1.5 py-0.5 rounded text-white">78</span></div>
+<p class="font-semibold text-sm mb-1">African Industries</p><p class="text-xs text-slate-400 mb-2">全品类(研磨机+材料+耗材)</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-amber-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-900">管</div><div class="w-5 h-5 rounded-full bg-emerald-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-white">王</div></div><span class="text-xs text-purple-400">视频验厂完成</span></div>
+</div>
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-purple-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">墨西哥</span><span class="lead-score-medium text-xs px-1.5 py-0.5 rounded text-white">70</span></div>
+<p class="font-semibold text-sm mb-1">LatAm Flooring Co.</p><p class="text-xs text-slate-400 mb-2">环氧材料+研磨机</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-blue-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-white">李</div></div><span class="text-xs text-slate-500">待样品确认</span></div>
+</div>
+</div>
+</div>
+<!-- Column 4 -->
+<div class="bg-slate-800 rounded-xl border border-slate-700 flex flex-col min-w-[240px]">
+<div class="p-3 border-b border-slate-700 flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-cyan-500"></div><span class="font-semibold text-sm">报价/谈判</span><span class="bg-slate-700 text-xs px-2 py-0.5 rounded-full">12</span></div><span class="text-xs text-slate-500">$380K</span></div>
+<div class="p-2 flex-1 overflow-y-auto space-y-2">
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-cyan-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">阿联酋</span><span class="lead-score-high text-xs px-1.5 py-0.5 rounded text-white">88</span></div>
+<p class="font-semibold text-sm mb-1">Gulf Construction LLC</p><p class="text-xs text-slate-400 mb-2">环氧地坪27系列 — $32K</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-amber-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-900">管</div></div><span class="text-xs text-cyan-400">等待反馈</span></div>
+</div>
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-slate-700 hover:border-cyan-500/50">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">英国</span><span class="lead-score-medium text-xs px-1.5 py-0.5 rounded text-white">75</span></div>
+<p class="font-semibold text-sm mb-1">UK Industrial Floors</p><p class="text-xs text-slate-400 mb-2">研磨机LJ640V+耗材 — $28K</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-emerald-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-white">王</div></div><span class="text-xs text-amber-400">价格谈判中</span></div>
+</div>
+</div>
+</div>
+<!-- Column 5 -->
+<div class="bg-slate-800 rounded-xl border border-slate-700 flex flex-col min-w-[240px]">
+<div class="p-3 border-b border-slate-700 flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-emerald-500"></div><span class="font-semibold text-sm">成交 Won</span><span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-full">8</span></div><span class="text-xs text-emerald-400 font-bold">$284K</span></div>
+<div class="p-2 flex-1 overflow-y-auto space-y-2">
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-emerald-500/30 hover:border-emerald-500">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">德国</span><span class="bg-emerald-500/20 text-emerald-400 text-xs px-1.5 py-0.5 rounded">已成交</span></div>
+<p class="font-semibold text-sm mb-1">EuroFlooring GmbH</p><p class="text-xs text-slate-400 mb-2">研磨机LJ600V x3 — $18,500</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-amber-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-slate-900">管</div></div><span class="text-xs text-emerald-400">PI已签</span></div>
+</div>
+<div class="kanban-card bg-slate-900 p-3 rounded-lg border border-emerald-500/30 hover:border-emerald-500">
+<div class="flex items-center justify-between mb-2"><span class="text-xs text-slate-400">马来西亚</span><span class="bg-emerald-500/20 text-emerald-400 text-xs px-1.5 py-0.5 rounded">已成交</span></div>
+<p class="font-semibold text-sm mb-1">Malaysia Epoxy Pro</p><p class="text-xs text-slate-400 mb-2">环氧材料27系列 — $45,000</p>
+<div class="flex items-center justify-between"><div class="flex -space-x-1"><div class="w-5 h-5 rounded-full bg-blue-500 border border-slate-900 flex items-center justify-center text-[8px] font-bold text-white">李</div></div><span class="text-xs text-emerald-400">生产中</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== CUSTOMERS ===== -->
+<div id="customers" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">客户档案</h2><p class="text-slate-400 text-sm mt-1">360度客户画像与历史交易记录</p></div>
+<div class="flex gap-3">
+<div class="relative"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i><input type="text" placeholder="搜索客户..." class="pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm w-64 input-gold focus:outline-none"></div>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>新增客户</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-1 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+<div class="p-3 border-b border-slate-700"><p class="text-xs font-semibold text-slate-500 uppercase">客户列表</p></div>
+<div class="overflow-y-auto max-h-[600px]">
+<div class="p-3 border-b border-slate-700/50 hover:bg-slate-700/30 cursor-pointer transition bg-slate-700/20 border-l-2 border-amber-500">
+<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-900 font-bold text-sm">E</div><div class="flex-1 min-w-0"><p class="font-semibold text-sm">EuroFlooring GmbH</p><p class="text-xs text-slate-400">德国 · 3次成交 · $128K</p></div><span class="text-xs text-emerald-400 font-semibold">活跃</span></div>
+</div>
+<div class="p-3 border-b border-slate-700/50 hover:bg-slate-700/30 cursor-pointer transition">
+<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">G</div><div class="flex-1 min-w-0"><p class="font-semibold text-sm">Gulf Construction LLC</p><p class="text-xs text-slate-400">阿联酋 · 1次成交 · $32K</p></div><span class="text-xs text-amber-400 font-semibold">谈判中</span></div>
+</div>
+<div class="p-3 border-b border-slate-700/50 hover:bg-slate-700/30 cursor-pointer transition">
+<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">M</div><div class="flex-1 min-w-0"><p class="font-semibold text-sm">Malaysia Epoxy Pro</p><p class="text-xs text-slate-400">马来西亚 · 2次成交 · $67K</p></div><span class="text-xs text-emerald-400 font-semibold">活跃</span></div>
+</div>
+<div class="p-3 border-b border-slate-700/50 hover:bg-slate-700/30 cursor-pointer transition">
+<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm">A</div><div class="flex-1 min-w-0"><p class="font-semibold text-sm">AsiaFloor Partners</p><p class="text-xs text-slate-400">新加坡 · 0次成交 · 高意向</p></div><span class="text-xs text-blue-400 font-semibold">跟进中</span></div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-6">
+<div class="flex items-start justify-between mb-6">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-900 font-bold text-2xl">E</div>
+<div>
+<h3 class="text-xl font-bold">EuroFlooring GmbH</h3>
+<p class="text-slate-400 text-sm">德国 · 工业地坪承包商 · 成立于2010年</p>
+<div class="flex gap-2 mt-2">
+<span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-xs">活跃客户</span>
+<span class="px-2 py-0.5 bg-amber-500/20 text-amber-400 rounded text-xs">VIP</span>
+<span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-xs">年采购>$50K</span>
+</div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 bg-slate-700 rounded-lg text-sm hover:bg-slate-600"><i class="fas fa-envelope mr-1"></i> 发邮件</button>
+<button class="px-3 py-1.5 bg-slate-700 rounded-lg text-sm hover:bg-slate-600"><i class="fas fa-phone mr-1"></i> 打电话</button>
+<button class="px-3 py-1.5 gold-gradient text-slate-900 rounded-lg text-sm font-semibold"><i class="fas fa-file-invoice mr-1"></i> 新建报价</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4 mb-6">
+<div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
+<p class="text-xs text-slate-500 mb-1">主要联系人</p>
+<p class="font-semibold">Klaus Mueller</p>
+<p class="text-xs text-slate-400">技术总监 / 采购决策人</p>
+<p class="text-xs text-amber-400 mt-1">klaus.mueller@euroflooring.de</p>
+</div>
+<div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
+<p class="text-xs text-slate-500 mb-1">公司信息</p>
+<p class="font-semibold">www.euroflooring.de</p>
+<p class="text-xs text-slate-400">员工120+ · 年营收EUR 8M</p>
+<p class="text-xs text-slate-400 mt-1">主营: 工业/商业地坪工程</p>
+</div>
+<div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
+<p class="text-xs text-slate-500 mb-1">采购偏好</p>
+<p class="font-semibold text-sm">研磨机 + 环氧材料</p>
+<p class="text-xs text-slate-400">季度采购 · 批量订单</p>
+<p class="text-xs text-emerald-400 mt-1">付款方式: TT 30%定金</p>
+</div>
+<div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
+<p class="text-xs text-slate-500 mb-1">客户价值</p>
+<p class="font-semibold text-lg gold-text">$128,450</p>
+<p class="text-xs text-slate-400">累计成交3次 · 平均客单价$42K</p>
+<p class="text-xs text-emerald-400 mt-1">复购率: 100%</p>
+</div>
+</div>
+<div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
+<p class="text-xs font-semibold text-slate-500 uppercase mb-4">跟进时间线</p>
+<div class="relative pl-8 space-y-4">
+<div class="timeline-line"></div>
+<div class="relative"><div class="absolute -left-8 top-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-800"></div><div><p class="text-sm font-semibold">订单成交 — 研磨机LJ600V x3台</p><p class="text-xs text-slate-400">2026-07-18 · 成交金额 $18,500 · PI已签</p></div></div>
+<div class="relative"><div class="absolute -left-8 top-0 w-4 h-4 rounded-full bg-cyan-500 border-2 border-slate-800"></div><div><p class="text-sm font-semibold">发送正式报价单</p><p class="text-xs text-slate-400">2026-07-15 · 报价金额 $19,200 · 含运费</p></div></div>
+<div class="relative"><div class="absolute -left-8 top-0 w-4 h-4 rounded-full bg-purple-500 border-2 border-slate-800"></div><div><p class="text-sm font-semibold">视频验厂通过</p><p class="text-xs text-slate-400">2026-07-10 · 工厂参观+产品演示</p></div></div>
+<div class="relative"><div class="absolute -left-8 top-0 w-4 h-4 rounded-full bg-blue-500 border-2 border-slate-800"></div><div><p class="text-sm font-semibold">首封开发信触达</p><p class="text-xs text-slate-400">2026-07-05 · 邮件打开率 85% · 2天后回复</p></div></div>
+<div class="relative"><div class="absolute -left-8 top-0 w-4 h-4 rounded-full bg-amber-500 border-2 border-slate-800"></div><div><p class="text-sm font-semibold">线索录入系统</p><p class="text-xs text-slate-400">2026-07-01 · 来源: Hannover Messe展会</p></div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== SOP ===== -->
+<div id="sop" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">跟进SOP</h2><p class="text-slate-400 text-sm mt-1">自动化跟进流程与话术模板</p></div>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>新建SOP</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">YUMEIGU 标准跟进SOP</h3>
+<div class="space-y-4">
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-amber-500 text-slate-900 text-xs font-bold flex items-center justify-center">1</span><span class="font-semibold">首触达 — 业务匹配切入</span></div><span class="text-xs text-emerald-400">已启用</span></div>
+<p class="text-xs text-slate-400">触发条件: 线索评分>=70分</p>
+<p class="text-xs text-slate-400">动作: 发送首封开发信(邮件+LinkedIn)</p>
+<p class="text-xs text-slate-400">间隔: 即时触发</p>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold flex items-center justify-center">2</span><span class="font-semibold">二次跟进 — 新品补充机会</span></div><span class="text-xs text-emerald-400">已启用</span></div>
+<p class="text-xs text-slate-400">触发条件: 首封邮件已读/回复</p>
+<p class="text-xs text-slate-400">动作: 发送产品目录+视频验厂邀请</p>
+<p class="text-xs text-slate-400">间隔: 3天后</p>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-purple-500 text-white text-xs font-bold flex items-center justify-center">3</span><span class="font-semibold">深度培育 — 差异化方案</span></div><span class="text-xs text-emerald-400">已启用</span></div>
+<p class="text-xs text-slate-400">触发条件: 视频验厂完成/样品确认</p>
+<p class="text-xs text-slate-400">动作: 发送定制化报价单+技术方案</p>
+<p class="text-xs text-slate-400">间隔: 5天后</p>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2"><span class="w-6 h-6 rounded-full bg-cyan-500 text-white text-xs font-bold flex items-center justify-center">4</span><span class="font-semibold">成交推进 — 临门一脚</span></div><span class="text-xs text-emerald-400">已启用</span></div>
+<p class="text-xs text-slate-400">触发条件: 报价已发送/谈判中</p>
+<p class="text-xs text-slate-400">动作: 发送PI+生产周期确认</p>
+<p class="text-xs text-slate-400">间隔: 7天后</p>
+</div>
+</div>
+</div>
+<div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">话术模板库</h3>
+<div class="space-y-3">
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-1"><span class="font-semibold text-sm">首封开发信 — 直接高效型</span><span class="text-xs text-amber-400">适配中小进口商</span></div>
+<p class="text-xs text-slate-400">120-160词 · 聚焦1个核心价值 · 引用客户业务动态</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-1"><span class="font-semibold text-sm">首封开发信 — 顾问专业型</span><span class="text-xs text-blue-400">适配中大型品牌</span></div>
+<p class="text-xs text-slate-400">技术方案切入 · 行业洞察 · 长期合作视角</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-1"><span class="font-semibold text-sm">首封开发信 — 产品机会型</span><span class="text-xs text-purple-400">适配新品扩张客户</span></div>
+<p class="text-xs text-slate-400">新品推介 · 市场空白分析 · 试单优惠</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-1"><span class="font-semibold text-sm">LinkedIn 私信模板</span><span class="text-xs text-emerald-400">轻量化触达</span></div>
+<p class="text-xs text-slate-400">80-120词 · 碎片化阅读 · 温和CTA</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition cursor-pointer">
+<div class="flex items-center justify-between mb-1"><span class="font-semibold text-sm">WhatsApp 跟进文案</span><span class="text-xs text-cyan-400">短平快触达</span></div>
+<p class="text-xs text-slate-400">50-80词 · 即时响应 · 行动导向</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== EMAIL ===== -->
+<div id="email" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">邮件营销</h2><p class="text-slate-400 text-sm mt-1">批量邮件发送与效果追踪</p></div>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>新建邮件</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-1 bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">邮件统计</h3>
+<div class="space-y-4">
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-2"><span class="text-sm text-slate-400">本月发送</span><span class="text-lg font-bold">1,248</span></div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="gold-gradient h-2 rounded-full" style="width:78%"></div></div>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-2"><span class="text-sm text-slate-400">打开率</span><span class="text-lg font-bold text-emerald-400">42.3%</span></div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-emerald-500 h-2 rounded-full" style="width:42%"></div></div>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-2"><span class="text-sm text-slate-400">回复率</span><span class="text-lg font-bold text-blue-400">18.7%</span></div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-blue-500 h-2 rounded-full" style="width:19%"></div></div>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-2"><span class="text-sm text-slate-400">退信率</span><span class="text-lg font-bold text-red-400">2.1%</span></div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-red-500 h-2 rounded-full" style="width:2%"></div></div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">邮件活动列表</h3>
+<div class="space-y-3">
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-semibold text-sm">7月地坪研磨机新品推广</span></div>
+<span class="text-xs text-emerald-400">已发送</span>
+</div>
+<p class="text-xs text-slate-400 mb-2">发送时间: 2026-07-15 · 目标: 高意向研磨机客户</p>
+<div class="flex gap-4 text-xs"><span class="text-slate-400">发送: 156</span><span class="text-emerald-400">打开: 89 (57%)</span><span class="text-blue-400">回复: 23 (15%)</span></div>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span class="font-semibold text-sm">环氧材料27系列全球推广</span></div>
+<span class="text-xs text-emerald-400">已发送</span>
+</div>
+<p class="text-xs text-slate-400 mb-2">发送时间: 2026-07-10 · 目标: 中东+东南亚客户</p>
+<div class="flex gap-4 text-xs"><span class="text-slate-400">发送: 234</span><span class="text-emerald-400">打开: 112 (48%)</span><span class="text-blue-400">回复: 34 (15%)</span></div>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="font-semibold text-sm">洗地机X510培训服务推广</span></div>
+<span class="text-xs text-amber-400">发送中</span>
+</div>
+<p class="text-xs text-slate-400 mb-2">发送时间: 2026-07-20 · 目标: 已购机客户</p>
+<div class="flex gap-4 text-xs"><span class="text-slate-400">发送: 89/120</span><span class="text-emerald-400">打开: 45 (51%)</span><span class="text-blue-400">回复: 12 (13%)</span></div>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 hover:border-amber-500/50 transition">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-slate-500"></span><span class="font-semibold text-sm">8月展会预热 — Hannover Messe</span></div>
+<span class="text-xs text-slate-500">草稿</span>
+</div>
+<p class="text-xs text-slate-400 mb-2">计划发送: 2026-08-01 · 目标: 欧洲潜在客户</p>
+<div class="flex gap-4 text-xs"><span class="text-slate-400">预计发送: 300</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== TASKS ===== -->
+<div id="tasks" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">任务中心</h2><p class="text-slate-400 text-sm mt-1">今日待办与团队任务分配</p></div>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-plus mr-2"></i>新建任务</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">今日待办 (7)</h3>
+<div class="space-y-3">
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 flex items-center gap-4">
+<div class="w-5 h-5 rounded border-2 border-amber-500 cursor-pointer flex items-center justify-center"></div>
+<div class="flex-1">
+<p class="font-semibold text-sm">跟进 Gulf Construction LLC — 确认报价反馈</p>
+<p class="text-xs text-slate-400">截止时间: 今天 17:00 · 优先级: 高</p>
+</div>
+<span class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">紧急</span>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 flex items-center gap-4">
+<div class="w-5 h-5 rounded border-2 border-amber-500 cursor-pointer flex items-center justify-center"></div>
+<div class="flex-1">
+<p class="font-semibold text-sm">发送 AsiaFloor Partners 技术方案</p>
+<p class="text-xs text-slate-400">截止时间: 今天 18:00 · 优先级: 高</p>
+</div>
+<span class="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-xs">高</span>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 flex items-center gap-4">
+<div class="w-5 h-5 rounded border-2 border-slate-600 cursor-pointer flex items-center justify-center"></div>
+<div class="flex-1">
+<p class="font-semibold text-sm">视频验厂 — African Industries</p>
+<p class="text-xs text-slate-400">截止时间: 明天 10:00 · 优先级: 中</p>
+</div>
+<span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">中</span>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 flex items-center gap-4">
+<div class="w-5 h-5 rounded border-2 border-slate-600 cursor-pointer flex items-center justify-center"></div>
+<div class="flex-1">
+<p class="font-semibold text-sm">更新 EuroFlooring GmbH 生产进度</p>
+<p class="text-xs text-slate-400">截止时间: 明天 15:00 · 优先级: 中</p>
+</div>
+<span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">中</span>
+</div>
+<div class="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50 flex items-center gap-4">
+<div class="w-5 h-5 rounded border-2 border-slate-600 cursor-pointer flex items-center justify-center"></div>
+<div class="flex-1">
+<p class="font-semibold text-sm">整理7月获客数据复盘报告</p>
+<p class="text-xs text-slate-400">截止时间: 周五 17:00 · 优先级: 低</p>
+</div>
+<span class="px-2 py-1 bg-slate-500/20 text-slate-400 rounded text-xs">低</span>
+</div>
+</div>
+</div>
+<div class="lg:col-span-1 bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">团队任务概览</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-slate-900 font-bold text-xs">管</div>
+<div class="flex-1"><p class="text-sm font-semibold">管理员</p><p class="text-xs text-slate-400">待办: 3 · 已完成: 12</p></div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-xs">李</div>
+<div class="flex-1"><p class="text-sm font-semibold">李经理</p><p class="text-xs text-slate-400">待办: 2 · 已完成: 8</p></div>
+</div>
+<div class="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs">王</div>
+<div class="flex-1"><p class="text-sm font-semibold">王专员</p><p class="text-xs text-slate-400">待办: 2 · 已完成: 15</p></div>
+</div>
+<div class="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<p class="text-xs text-slate-500 mb-2">本周完成率</p>
+<div class="w-full bg-slate-700 rounded-full h-3"><div class="gold-gradient h-3 rounded-full" style="width:76%"></div></div>
+<p class="text-xs text-right mt-1 text-amber-400">76%</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== ANALYTICS ===== -->
+<div id="analytics" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">转化分析</h2><p class="text-slate-400 text-sm mt-1">全链路数据洞察与优化建议</p></div>
+<div class="flex gap-3">
+<select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm"><option>近30天</option><option>近90天</option><option>本年度</option></select>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-download mr-2"></i>导出报告</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">获客漏斗转化率</h3>
+<canvas id="conversionChart" height="200"></canvas>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">各阶段平均停留时间</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full bg-amber-500"></div><span class="text-sm flex-1">新线索 → 已联系</span><span class="text-sm font-bold">2.3天</span></div>
+<div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full bg-blue-500"></div><span class="text-sm flex-1">已联系 → 需求确认</span><span class="text-sm font-bold">5.7天</span></div>
+<div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full bg-purple-500"></div><span class="text-sm flex-1">需求确认 → 报价</span><span class="text-sm font-bold">8.2天</span></div>
+<div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full bg-cyan-500"></div><span class="text-sm flex-1">报价 → 成交</span><span class="text-sm font-bold">12.5天</span></div>
+<div class="flex items-center gap-3"><div class="w-3 h-3 rounded-full bg-emerald-500"></div><span class="text-sm flex-1">总周期 (线索→成交)</span><span class="text-sm font-bold text-emerald-400">28.7天</span></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">高转化来源TOP5</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between"><span class="text-sm">展会 (Hannover Messe)</span><span class="text-sm font-bold text-emerald-400">28.5%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">官网询盘</span><span class="text-sm font-bold text-emerald-400">22.1%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">LinkedIn</span><span class="text-sm font-bold text-emerald-400">18.3%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">老客户转介绍</span><span class="text-sm font-bold text-emerald-400">15.7%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">Facebook</span><span class="text-sm font-bold text-emerald-400">8.2%</span></div>
+</div>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">高转化国家/地区</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between"><span class="text-sm">德国</span><span class="text-sm font-bold text-emerald-400">32.1%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">阿联酋</span><span class="text-sm font-bold text-emerald-400">24.5%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">马来西亚</span><span class="text-sm font-bold text-emerald-400">19.8%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">新加坡</span><span class="text-sm font-bold text-emerald-400">14.2%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">沙特</span><span class="text-sm font-bold text-emerald-400">9.4%</span></div>
+</div>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">高转化产品</h3>
+<div class="space-y-3">
+<div class="flex items-center justify-between"><span class="text-sm">研磨机LJ600V</span><span class="text-sm font-bold text-emerald-400">35.2%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">环氧材料27系列</span><span class="text-sm font-bold text-emerald-400">28.7%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">金刚石磨片</span><span class="text-sm font-bold text-emerald-400">18.4%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">洗地机X510</span><span class="text-sm font-bold text-emerald-400">12.3%</span></div>
+<div class="flex items-center justify-between"><span class="text-sm">工业吸尘器LJ400</span><span class="text-sm font-bold text-emerald-400">5.4%</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== REPORTS ===== -->
+<div id="reports" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div><h2 class="text-2xl font-bold">数据报表</h2><p class="text-slate-400 text-sm mt-1">每日开发数据复盘与归档</p></div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:border-amber-500 transition"><i class="fas fa-calendar mr-2"></i>选择日期</button>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm"><i class="fas fa-download mr-2"></i>导出Excel</button>
+</div>
+</div>
+<div class="bg-slate-800 rounded-xl border border-slate-700 p-5 mb-6">
+<h3 class="font-bold mb-4">7月获客复盘表</h3>
+<table class="w-full text-sm">
+<thead class="bg-slate-900/50 text-slate-400">
+<tr><th class="px-4 py-3 text-left font-medium">日期</th><th class="px-4 py-3 text-left font-medium">新增线索</th><th class="px-4 py-3 text-left font-medium">有效线索</th><th class="px-4 py-3 text-left font-medium">已联系</th><th class="px-4 py-3 text-left font-medium">报价</th><th class="px-4 py-3 text-left font-medium">成交</th><th class="px-4 py-3 text-left font-medium">成交金额</th><th class="px-4 py-3 text-left font-medium">主要来源</th></tr>
+</thead>
+<tbody class="divide-y divide-slate-700/50">
+<tr class="hover:bg-slate-700/30 transition"><td class="px-4 py-3">2026-07-21</td><td class="px-4 py-3">12</td><td class="px-4 py-3 text-emerald-400">8</td><td class="px-4 py-3">5</td><td class="px-4 py-3">2</td><td class="px-4 py-3 text-emerald-400 font-bold">1</td><td class="px-4 py-3 text-emerald-400">$18,500</td><td class="px-4 py-3"><span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">LinkedIn</span></td></tr>
+<tr class="hover:bg-slate-700/30 transition"><td class="px-4 py-3">2026-07-20</td><td class="px-4 py-3">15</td><td class="px-4 py-3 text-emerald-400">10</td><td class="px-4 py-3">7</td><td class="px-4 py-3">3</td><td class="px-4 py-3 text-emerald-400 font-bold">0</td><td class="px-4 py-3">-</td><td class="px-4 py-3"><span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">官网</span></td></tr>
+<tr class="hover:bg-slate-700/30 transition"><td class="px-4 py-3">2026-07-19</td><td class="px-4 py-3">8</td><td class="px-4 py-3 text-emerald-400">5</td><td class="px-4 py-3">4</td><td class="px-4 py-3">1</td><td class="px-4 py-3 text-emerald-400 font-bold">1</td><td class="px-4 py-3 text-emerald-400">$45,000</td><td class="px-4 py-3"><span class="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-xs">展会</span></td></tr>
+<tr class="hover:bg-slate-700/30 transition"><td class="px-4 py-3">2026-07-18</td><td class="px-4 py-3">18</td><td class="px-4 py-3 text-emerald-400">12</td><td class="px-4 py-3">8</td><td class="px-4 py-3">4</td><td class="px-4 py-3 text-emerald-400 font-bold">2</td><td class="px-4 py-3 text-emerald-400">$62,000</td><td class="px-4 py-3"><span class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">LinkedIn</span></td></tr>
+<tr class="hover:bg-slate-700/30 transition"><td class="px-4 py-3">2026-07-17</td><td class="px-4 py-3">10</td><td class="px-4 py-3 text-emerald-400">7</td><td class="px-4 py-3">5</td><td class="px-4 py-3">2</td><td class="px-4 py-3 text-emerald-400 font-bold">0</td><td class="px-4 py-3">-</td><td class="px-4 py-3"><span class="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs">官网</span></td></tr>
+</tbody>
+</table>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">月度趋势</h3>
+<canvas id="monthlyChart" height="150"></canvas>
+</div>
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+<h3 class="font-bold mb-4">团队绩效对比</h3>
+<canvas id="teamChart" height="150"></canvas>
+</div>
+</div>
+</div>
+
+
+
+<!-- ===== AGENT总控台 ===== -->
+<div id="agent" class="hidden fade-in">
+<div class="flex items-center justify-between mb-6">
+<div>
+<h2 class="text-2xl font-bold">AI Agent总控台</h2>
+<p class="text-slate-400 text-sm mt-1">6大智能体协同工作，全链路自动化获客</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm hover:border-amber-500 transition">
+<i class="fas fa-play mr-2"></i>启动全链路
+</button>
+<button class="px-4 py-2 gold-gradient text-slate-900 font-semibold rounded-lg text-sm">
+<i class="fas fa-cog mr-2"></i>系统配置
+</button>
+</div>
+</div>
+
+<!-- Agent状态总览 -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+<div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center card-hover">
+<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-amber-500/20 flex items-center justify-center">
+<i class="fas fa-search text-amber-400 text-lg"></i>
+</div>
+<h3 class="font-bold text-sm">挖掘Agent</h3>
+<p class="text-xs text-emerald-400 mt-1">运行中</p>
+<p class="text-xs text-slate-500 mt-1">今日: 45条</p>
+</div>
+<div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center card-hover">
+<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-500/20 flex items-center justify-center">
+<i class="fas fa-filter text-blue-400 text-lg"></i>
+</div>
+<h3 class="font-bold text-sm">清洗Agent</h3>
+<p class="text-xs text-emerald-400 mt-1">运行中</p>
+<p class="text-xs text-slate-500 mt-1">待处理: 23条</p>
+</div>
+<div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center card-hover">
+<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-500/20 flex items-center justify-center">
+<i class="fas fa-pen-fancy text-purple-400 text-lg"></i>
+</div>
+<h3 class="font-bold text-sm">文案Agent</h3>
+<p class="text-xs text-emerald-400 mt-1">运行中</p>
+<p class="text-xs text-slate-500 mt-1">待审: 8封</p>
+</div>
+<div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center card-hover">
+<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-cyan-500/20 flex items-center justify-center">
+<i class="fas fa-paper-plane text-cyan-400 text-lg"></i>
+</div>
+<h3 class="font-bold text-sm">发送Agent</h3>
+<p class="text-xs text-emerald-400 mt-1">运行中</p>
+<p class="text-xs text-slate-500 mt-1">队列: 12封</p>
+</div>
+<div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center card-hover">
+<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-rose-500/20 flex items-center justify-center">
+<i class="fas fa-comments text-rose-400 text-lg"></i>
+</div>
+<h3 class="font-bold text-sm">对话Agent</h3>
+<p class="text-xs text-amber-400 mt-1">3条待回复</p>
+<p class="text-xs text-slate-500 mt-1">A级: 2 | B级: 5</p>
+</div>
+<div class="bg-slate-800 rounded-xl p-4 border border-slate-700 text-center card-hover">
+<div class="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-500/20 flex items-center justify-center">
+<i class="fas fa-bell text-emerald-400 text-lg"></i>
+</div>
+<h3 class="font-bold text-sm">通知Agent</h3>
+<p class="text-xs text-emerald-400 mt-1">运行中</p>
+<p class="text-xs text-slate-500 mt-1">今日推送: 5</p>
+</div>
+</div>
+
+<!-- 工作流管道 -->
+<div class="bg-slate-800 rounded-xl p-5 border border-slate-700 mb-6">
+<h3 class="font-bold mb-4">Agent协作工作流</h3>
+<div class="flex items-center justify-between">
+<div class="flex-1 flex items-center gap-2">
+<div class="flex-1 bg-slate-900 rounded-lg p-3 border border-amber-500/30 text-center">
+<i class="fas fa-search text-amber-400 mb-1"></i>
+<p class="text-xs font-semibold">挖掘</p>
+<p class="text-xs text-slate-500">原始线索</p>
+</div>
+<i class="fas fa-arrow-right text-slate-600"></i>
+<div class="flex-1 bg-slate-900 rounded-lg p-3 border border-blue-500/30 text-center">
+<i class="fas fa-filter text-blue-400 mb-1"></i>
+<p class="text-xs font-semibold">清洗</p>
+<p class="text-xs text-slate-500">精准清单</p>
+</div>
+<i class="fas fa-arrow-right text-slate-600"></i>
+<div class="flex-1 bg-slate-900 rounded-lg p-3 border border-purple-500/30 text-center">
+<i class="fas fa-pen-fancy text-purple-400 mb-1"></i>
+<p class="text-xs font-semibold">文案</p>
+<p class="text-xs text-slate-500">定制开发信</p>
+</div>
+<i class="fas fa-arrow-right text-slate-600"></i>
+<div class="flex-1 bg-slate-900 rounded-lg p-3 border border-cyan-500/30 text-center">
+<i class="fas fa-paper-plane text-cyan-400 mb-1"></i>
+<p class="text-xs font-semibold">发送</p>
+<p class="text-xs text-slate-500">节奏推送</p>
+</div>
+<i class="fas fa-arrow-right text-slate-600"></i>
+<div class="flex-1 bg-slate-900 rounded-lg p-3 border border-rose-500/30 text-center">
+<i class="fas fa-comments text-rose-400 mb-1"></i>
+<p class="text-xs font-semibold">对话</p>
+<p class="text-xs text-slate-500">意向评估</p>
+</div>
+<i class="fas fa-arrow-right text-slate-600"></i>
+<div class="flex-1 bg-slate-900 rounded-lg p-3 border border-emerald-500/30 text-center">
+<i class="fas fa-bell text-emerald-400 mb-1"></i>
+<p class="text-xs font-semibold">通知</p>
+<p class="text-xs text-slate-500">推送人工</p>
+</div>
+</div>
+</div>
+<div class="mt-4 flex items-center justify-center gap-6 text-xs text-slate-500">
+<span><i class="fas fa-user-check text-amber-400 mr-1"></i>人工复核点</span>
+<span><i class="fas fa-exclamation-triangle text-red-400 mr-1"></i>价格/交期/认证 → 强制移交</span>
+<span><i class="fas fa-ban text-red-400 mr-1"></i>禁止AI擅自报价</span>
+</div>
+</div>
+
+<!-- Agent详情面板 -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">Agent运行日志</h3>
+<div class="space-y-3 max-h-[400px] overflow-y-auto">
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-semibold text-amber-400">[挖掘Agent]</span>
+<span class="text-xs text-slate-500">2分钟前</span>
+</div>
+<p class="text-xs text-slate-300">完成德国市场扫描，新增线索12条（研磨机需求8条，环氧材料4条）</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-semibold text-blue-400">[清洗Agent]</span>
+<span class="text-xs text-slate-500">5分钟前</span>
+</div>
+<p class="text-xs text-slate-300">校验通过8条，标记A级3条、B级5条；剔除4条（官网失效2条，纯中间商2条）</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-semibold text-purple-400">[文案Agent]</span>
+<span class="text-xs text-slate-500">8分钟前</span>
+</div>
+<p class="text-xs text-slate-300">为EuroFlooring GmbH生成3版开发信，引用其官网迪拜项目动态，待人工审阅</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-semibold text-rose-400">[对话Agent]</span>
+<span class="text-xs text-slate-500">15分钟前</span>
+</div>
+<p class="text-xs text-slate-300">Gulf Construction LLC回复询问CE认证，已标记【移交人工】，通知Agent已推送业务员</p>
+</div>
+<div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<div class="flex items-center justify-between mb-1">
+<span class="text-xs font-semibold text-emerald-400">[通知Agent]</span>
+<span class="text-xs text-slate-500">20分钟前</span>
+</div>
+<p class="text-xs text-slate-300">推送A级客户2名至业务员：AsiaFloor Partners(92分)、African Industries(78分)</p>
+</div>
+</div>
+</div>
+<div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
+<h3 class="font-bold mb-4">今日Agent绩效</h3>
+<div class="space-y-4">
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm">挖掘Agent — 线索采集</span>
+<span class="text-sm font-bold">45/50</span>
+</div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="gold-gradient h-2 rounded-full" style="width:90%"></div></div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm">清洗Agent — 有效线索</span>
+<span class="text-sm font-bold text-emerald-400">31/45</span>
+</div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-emerald-500 h-2 rounded-full" style="width:69%"></div></div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm">文案Agent — 开发信产出</span>
+<span class="text-sm font-bold text-purple-400">18/25</span>
+</div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-purple-500 h-2 rounded-full" style="width:72%"></div></div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm">发送Agent — 邮件送达</span>
+<span class="text-sm font-bold text-cyan-400">42/45</span>
+</div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-cyan-500 h-2 rounded-full" style="width:93%"></div></div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm">对话Agent — 客户回复</span>
+<span class="text-sm font-bold text-rose-400">8/12</span>
+</div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-rose-500 h-2 rounded-full" style="width:67%"></div></div>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1">
+<span class="text-sm">通知Agent — 人工推送</span>
+<span class="text-sm font-bold text-emerald-400">5/5</span>
+</div>
+<div class="w-full bg-slate-700 rounded-full h-2"><div class="bg-emerald-500 h-2 rounded-full" style="width:100%"></div></div>
+</div>
+</div>
+<div class="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+<p class="text-xs text-slate-400"><i class="fas fa-info-circle text-amber-400 mr-1"></i> 文案Agent有8封开发信待人工审阅，发送Agent队列中有3封邮件因时区限制延迟至明日发送</p>
+</div>
+</div>
+</div>
+
+<!-- 强制规则提醒 -->
+<div class="mt-6 bg-gradient-to-r from-red-900/30 to-amber-900/30 rounded-xl p-5 border border-red-500/30">
+<div class="flex items-start gap-3">
+<i class="fas fa-shield-alt text-red-400 text-xl mt-1"></i>
+<div>
+<h3 class="font-bold text-red-400 mb-2">全局强制规则</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+<div class="flex items-center gap-2"><i class="fas fa-check text-emerald-400"></i><span class="text-slate-300">严禁捏造企业信息，所有输出附带可溯源链接</span></div>
+<div class="flex items-center gap-2"><i class="fas fa-check text-emerald-400"></i><span class="text-slate-300">价格/交期/认证问题 → 100%移交人工</span></div>
+<div class="flex items-center gap-2"><i class="fas fa-check text-emerald-400"></i><span class="text-slate-300">禁止AI擅自报价或承诺交付周期</span></div>
+<div class="flex items-center gap-2"><i class="fas fa-check text-emerald-400"></i><span class="text-slate-300">开发信必须引用客户真实业务动态</span></div>
+<div class="flex items-center gap-2"><i class="fas fa-check text-emerald-400"></i><span class="text-slate-300">每日发送量<=50封，避免反垃圾机制</span></div>
+<div class="flex items-center gap-2"><i class="fas fa-check text-emerald-400"></i><span class="text-slate-300">A级客户24小时内人工必须跟进</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</main>
+</div>
+
+<script>
+function switchTab(tabId) {
+    if(event && event.currentTarget) {
+    // Hide all tabs
+    document.querySelectorAll('#mainContent > div').forEach(div => {
+        div.classList.add('hidden');
+    });
+    // Show selected tab
+    document.getElementById(tabId).classList.remove('hidden');
+    // Update sidebar active state
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('active');
+        item.classList.add('text-slate-300');
+    });
+        event.currentTarget.classList.add('active');
+        event.currentTarget.classList.remove('text-slate-300');
+    }
+}
+
+// Chart.js configurations
+const funnelCtx = document.getElementById('funnelChart').getContext('2d');
+new Chart(funnelCtx, {
+    type: 'line',
+    data: {
+        labels: ['7/1','7/5','7/10','7/15','7/20','7/21'],
+        datasets: [{
+            label: '新增线索',
+            data: [12,18,15,22,15,12],
+            borderColor: '#F5A623',
+            backgroundColor: 'rgba(245,166,35,0.1)',
+            fill: true,
+            tension: 0.4
+        },{
+            label: '有效线索',
+            data: [8,12,10,15,10,8],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.1)',
+            fill: true,
+            tension: 0.4
+        },{
+            label: '成交',
+            data: [1,2,1,3,0,1],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.1)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#94a3b8' } } },
+        scales: {
+            y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+            x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } }
+        }
+    }
+});
+
+const sourceCtx = document.getElementById('sourceChart').getContext('2d');
+new Chart(sourceCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['官网询盘','LinkedIn','展会','Facebook','老客户转介','其他'],
+        datasets: [{
+            data: [35,28,18,10,6,3],
+            backgroundColor: ['#F5A623','#3b82f6','#10b981','#8b5cf6','#06b6d4','#6b7280']
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } }
+    }
+});
+
+const conversionCtx = document.getElementById('conversionChart');
+if(conversionCtx) {
+    new Chart(conversionCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['新线索','已联系','需求确认','报价','成交'],
+            datasets: [{
+                label: '人数',
+                data: [156,107,68,45,20],
+                backgroundColor: ['#F5A623','#3b82f6','#8b5cf6','#06b6d4','#10b981']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+                x: { grid: { display: false }, ticks: { color: '#64748b' } }
+            }
+        }
+    });
+}
+
+const monthlyCtx = document.getElementById('monthlyChart');
+if(monthlyCtx) {
+    new Chart(monthlyCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['1月','2月','3月','4月','5月','6月','7月'],
+            datasets: [{
+                label: '成交金额($K)',
+                data: [120,145,180,165,210,240,284],
+                backgroundColor: '#F5A623'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+                x: { grid: { display: false }, ticks: { color: '#64748b' } }
+            }
+        }
+    });
+}
+
+const teamCtx = document.getElementById('teamChart');
+if(teamCtx) {
+    new Chart(teamCtx.getContext('2d'), {
+        type: 'radar',
+        data: {
+            labels: ['线索开发','客户跟进','成交转化','邮件营销','视频验厂','报价谈判'],
+            datasets: [{
+                label: '管理员',
+                data: [90,85,88,92,80,87],
+                borderColor: '#F5A623',
+                backgroundColor: 'rgba(245,166,35,0.2)'
+            },{
+                label: '李经理',
+                data: [75,90,82,78,95,85],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59,130,246,0.2)'
+            },{
+                label: '王专员',
+                data: [85,78,75,85,70,80],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16,185,129,0.2)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    grid: { color: '#1e293b' },
+                    angleLines: { color: '#1e293b' },
+                    pointLabels: { color: '#94a3b8' },
+                    ticks: { display: false }
+                }
+            }
+        }
+    });
+}
+</script>
+
+</body>
+</html>
