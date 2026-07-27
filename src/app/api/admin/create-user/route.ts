@@ -5,6 +5,40 @@ const ALLOWED_DOMAIN = 'yumeigu.com';
 
 export async function POST(request: NextRequest) {
   try {
+    // 验证管理员权限
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) {
+      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
+    }
+
+    const supabaseUrl = process.env.COZE_SUPABASE_URL;
+    const supabaseAnonKey = process.env.COZE_SUPABASE_ANON_KEY;
+    const supabaseServiceKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceKey) {
+      return NextResponse.json({ error: 'Supabase 配置缺失' }, { status: 500 });
+    }
+
+    // 验证当前用户是否为管理员
+    const client = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { authorization: authHeader } },
+    });
+
+    const { data: { user } } = await client.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: '用户未登录' }, { status: 401 });
+    }
+
+    const { data: roleData } = await client
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!roleData || roleData.role !== 'admin') {
+      return NextResponse.json({ error: '需要管理员权限' }, { status: 403 });
+    }
+
     const body = await request.json();
     const email = body.email;
     const full_name = body.full_name || body.fullName;
@@ -17,13 +51,6 @@ export async function POST(request: NextRequest) {
     // 验证邮箱域名
     if (!email.endsWith(`@${ALLOWED_DOMAIN}`)) {
       return NextResponse.json({ error: `只允许 ${ALLOWED_DOMAIN} 邮箱注册` }, { status: 400 });
-    }
-
-    const supabaseUrl = process.env.COZE_SUPABASE_URL;
-    const supabaseServiceKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      return NextResponse.json({ error: 'Supabase 配置缺失' }, { status: 500 });
     }
 
     // 使用 service_role 创建用户（绕过 RLS）

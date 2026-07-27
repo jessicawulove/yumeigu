@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { Agent, CATEGORIES } from '@/lib/types';
 import { getAgents, addAgent, updateAgent, deleteAgent } from '@/lib/store';
+import { getSupabaseBrowserClientWithRetry } from '@/lib/supabase-browser';
 
 type ModalMode = 'create' | 'edit' | null;
 
@@ -152,9 +153,16 @@ export default function AdminPage() {
     setEmpLoading(true);
     setEmpMsg('');
     try {
+      // 获取当前用户的 session token
+      const supabase = await getSupabaseBrowserClientWithRetry();
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const res = await fetch('/api/admin/create-user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token || ''}`,
+        },
         body: JSON.stringify(empForm),
       });
       const data = await res.json();
