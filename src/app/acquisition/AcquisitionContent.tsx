@@ -72,6 +72,11 @@ const leads = [
 
 export default function AcquisitionPage() {
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
+  const [selectedLead, setSelectedLead] = useState<typeof leads[0] | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingLead, setEditingLead] = useState<typeof leads[0] | null>(null);
 
   const sidebarItems: { id: TabId; icon: React.ReactNode; label: string; badge?: number; badgeColor?: string }[] = [
     { id: 'dashboard', icon: <TrendingUp size={18} />, label: '数据总览' },
@@ -158,7 +163,15 @@ export default function AcquisitionPage() {
         {/* Main Content */}
         <main className="min-h-[calc(100vh-3.5rem)] flex-1 overflow-auto p-6">
           {activeTab === 'dashboard' && <DashboardTab getScoreClass={getScoreClass} getGradientBg={getGradientBg} />}
-          {activeTab === 'leads' && <LeadsTab getScoreClass={getScoreClass} getGradientBg={getGradientBg} />}
+          {activeTab === 'leads' && (
+            <LeadsTab 
+              getScoreClass={getScoreClass} 
+              getGradientBg={getGradientBg}
+              onRowClick={(lead) => { setSelectedLead(lead); setShowDetailModal(true); }}
+              onEditClick={(lead) => { setEditingLead(lead); setShowEditModal(true); }}
+              onAddClick={() => setShowAddModal(true)}
+            />
+          )}
           {activeTab === 'pipeline' && <PipelineTab getScoreClass={getScoreClass} />}
           {activeTab === 'customers' && <CustomersTab />}
           {activeTab === 'sop' && <SOPTab />}
@@ -169,6 +182,133 @@ export default function AcquisitionPage() {
           {activeTab === 'agent' && <AgentTab />}
         </main>
       </div>
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowDetailModal(false)}>
+          <div className="w-full max-w-2xl rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-slate-700 px-6 py-4">
+              <h3 className="text-lg font-bold text-white">客户详情</h3>
+              <button onClick={() => setShowDetailModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br text-xl font-bold ${getGradientBg(selectedLead.gradient)}`}>{selectedLead.initial}</div>
+                <div>
+                  <h4 className="text-xl font-bold text-white">{selectedLead.name}</h4>
+                  <p className="text-slate-400">{selectedLead.contact} · {selectedLead.country}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-lg bg-slate-900/50 p-4">
+                  <p className="text-xs text-slate-500 mb-1">来源渠道</p>
+                  <p className="font-semibold text-white">{selectedLead.source}</p>
+                </div>
+                <div className="rounded-lg bg-slate-900/50 p-4">
+                  <p className="text-xs text-slate-500 mb-1">意向产品</p>
+                  <p className="font-semibold text-white">{selectedLead.product}</p>
+                </div>
+                <div className="rounded-lg bg-slate-900/50 p-4">
+                  <p className="text-xs text-slate-500 mb-1">评分</p>
+                  <p className="font-semibold text-white">{selectedLead.score}</p>
+                </div>
+                <div className="rounded-lg bg-slate-900/50 p-4">
+                  <p className="text-xs text-slate-500 mb-1">阶段</p>
+                  <p className="font-semibold text-white">{selectedLead.stage}</p>
+                </div>
+              </div>
+              <div className="mt-6 flex gap-3">
+                <button className="flex-1 rounded-lg bg-amber-500 py-2 font-semibold text-slate-900 hover:bg-amber-600 transition">发送邮件</button>
+                <button className="flex-1 rounded-lg border border-slate-700 py-2 font-semibold text-white hover:bg-slate-700 transition">安排跟进</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && editingLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowEditModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-slate-700 px-6 py-4">
+              <h3 className="text-lg font-bold text-white">编辑线索</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">公司名称</label>
+                <input type="text" defaultValue={editingLead.name} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">联系人</label>
+                <input type="text" defaultValue={editingLead.contact} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">国家</label>
+                <input type="text" defaultValue={editingLead.country} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">阶段</label>
+                <select defaultValue={editingLead.stage} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none">
+                  <option>新线索</option>
+                  <option>已联系</option>
+                  <option>需求确认</option>
+                  <option>报价中</option>
+                  <option>已成交</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={() => setShowEditModal(false)} className="flex-1 rounded-lg border border-slate-700 py-2 font-semibold text-white hover:bg-slate-700 transition">取消</button>
+                <button onClick={() => setShowEditModal(false)} className="flex-1 rounded-lg bg-amber-500 py-2 font-semibold text-slate-900 hover:bg-amber-600 transition">保存</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-slate-800 border border-slate-700 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-slate-700 px-6 py-4">
+              <h3 className="text-lg font-bold text-white">新增线索</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">公司名称 *</label>
+                <input type="text" placeholder="输入公司名称" className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">联系人 *</label>
+                <input type="text" placeholder="输入联系人姓名" className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">国家/地区</label>
+                <input type="text" placeholder="输入国家或地区" className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">来源渠道</label>
+                <select className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none">
+                  <option>官网询盘</option>
+                  <option>LinkedIn</option>
+                  <option>展会</option>
+                  <option>Facebook</option>
+                  <option>老客户转介</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">意向产品</label>
+                <input type="text" placeholder="输入意向产品" className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none" />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={() => setShowAddModal(false)} className="flex-1 rounded-lg border border-slate-700 py-2 font-semibold text-white hover:bg-slate-700 transition">取消</button>
+                <button onClick={() => setShowAddModal(false)} className="flex-1 rounded-lg bg-amber-500 py-2 font-semibold text-slate-900 hover:bg-amber-600 transition">创建</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -366,9 +506,31 @@ function ActivityItem({ icon, iconBg, iconColor, text, time }: { icon: React.Rea
 }
 
 /* ========== Leads Tab ========== */
-function LeadsTab({ getScoreClass, getGradientBg }: { getScoreClass: (s: number) => string; getGradientBg: (g: string) => string }) {
+function LeadsTab({ 
+  getScoreClass, 
+  getGradientBg,
+  onRowClick,
+  onEditClick,
+  onAddClick 
+}: { 
+  getScoreClass: (s: number) => string; 
+  getGradientBg: (g: string) => string;
+  onRowClick: (lead: typeof leads[0]) => void;
+  onEditClick: (lead: typeof leads[0]) => void;
+  onAddClick: () => void;
+}) {
   const filters = ['全部线索 (156)', '高意向 (23)', '待跟进 (45)', '已联系 (38)', '沉睡线索 (28)', '无效线索 (22)'];
   const [activeFilter, setActiveFilter] = useState(0);
+
+  const filteredLeads = leads.filter(lead => {
+    if (activeFilter === 0) return true;
+    if (activeFilter === 1) return lead.score >= 85;
+    if (activeFilter === 2) return lead.stage === '需求确认' || lead.stage === '报价中';
+    if (activeFilter === 3) return lead.stage === '已联系';
+    if (activeFilter === 4) return lead.score < 60;
+    if (activeFilter === 5) return lead.stage === '无效';
+    return true;
+  });
 
   return (
     <div className="animate-fade-in">
@@ -377,7 +539,7 @@ function LeadsTab({ getScoreClass, getGradientBg }: { getScoreClass: (s: number)
         <div className="flex gap-3">
           <div className="relative"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" /><input type="text" placeholder="搜索客户/公司/国家..." className="w-64 rounded-lg border border-slate-700 bg-slate-800 py-2 pl-10 pr-4 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20" /></div>
           <button className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm transition hover:border-amber-500"><Filter size={14} />筛选</button>
-          <button className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-semibold text-slate-900"><Plus size={14} />新增线索</button>
+          <button onClick={onAddClick} className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-semibold text-slate-900 hover:from-amber-600 hover:to-amber-700 transition"><Plus size={14} />新增线索</button>
         </div>
       </div>
       <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
@@ -400,9 +562,9 @@ function LeadsTab({ getScoreClass, getGradientBg }: { getScoreClass: (s: number)
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700/50">
-            {leads.map(lead => (
-              <tr key={lead.name} className="cursor-pointer transition hover:bg-slate-700/30">
-                <td className="px-4 py-3"><input type="checkbox" className="rounded border-slate-600 bg-slate-700" /></td>
+            {filteredLeads.map(lead => (
+              <tr key={lead.name} onClick={() => onRowClick(lead)} className="cursor-pointer transition hover:bg-slate-700/30">
+                <td className="px-4 py-3" onClick={e => e.stopPropagation()}><input type="checkbox" className="rounded border-slate-600 bg-slate-700" /></td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className={`flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br text-xs font-bold ${getGradientBg(lead.gradient)}`}>{lead.initial}</div>
@@ -416,9 +578,9 @@ function LeadsTab({ getScoreClass, getGradientBg }: { getScoreClass: (s: number)
                 <td className="px-4 py-3 text-xs text-slate-400">{lead.time}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <button className="text-slate-400 hover:text-amber-400"><Edit size={14} /></button>
-                    <button className="text-slate-400 hover:text-amber-400"><Mail size={14} /></button>
-                    <button className="text-slate-400 hover:text-amber-400"><MoreVertical size={14} /></button>
+                    <button onClick={e => { e.stopPropagation(); onEditClick(lead); }} className="text-slate-400 hover:text-amber-400"><Edit size={14} /></button>
+                    <button onClick={e => e.stopPropagation()} className="text-slate-400 hover:text-amber-400"><Mail size={14} /></button>
+                    <button onClick={e => e.stopPropagation()} className="text-slate-400 hover:text-amber-400"><MoreVertical size={14} /></button>
                   </div>
                 </td>
               </tr>
@@ -426,7 +588,7 @@ function LeadsTab({ getScoreClass, getGradientBg }: { getScoreClass: (s: number)
           </tbody>
         </table>
         <div className="flex items-center justify-between border-t border-slate-700 px-4 py-3">
-          <span className="text-xs text-slate-500">显示 1-5 共 156 条</span>
+          <span className="text-xs text-slate-500">显示 1-{filteredLeads.length} 共 {filteredLeads.length} 条</span>
           <div className="flex gap-2">
             <button className="rounded bg-slate-900 px-3 py-1 text-xs text-slate-400 hover:text-white"><ChevronLeft size={14} /></button>
             <button className="rounded bg-amber-500 px-3 py-1 text-xs font-bold text-slate-900">1</button>
