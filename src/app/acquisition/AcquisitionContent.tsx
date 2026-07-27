@@ -12,10 +12,19 @@ import {
   Star, Users, Bell, Brain, BarChart3, PieChart as PieIcon,
   Bot, Send, MessageSquare, ClipboardList, Calendar, Download,
   Play, Settings, Shield, ChevronLeft, ChevronRight, ArrowUp, Info,
-  Ban, Check, Zap, ArrowRight, UserCheck, TriangleAlert
+  Ban, Check, Zap, ArrowRight, UserCheck, TriangleAlert, X
 } from 'lucide-react';
 
-type TabId = 'dashboard' | 'leads' | 'pipeline' | 'customers' | 'sop' | 'email' | 'tasks' | 'analytics' | 'reports' | 'agent';
+type TabId = 'dashboard' | 'leads' | 'pipeline' | 'customers' | 'sop' | 'email' | 'tasks' | 'analytics' | 'reports' | 'agent' | 'settings';
+
+interface EmailConfig {
+  smtpHost: string;
+  smtpPort: string;
+  smtpUser: string;
+  smtpPass: string;
+  fromName: string;
+  fromEmail: string;
+}
 
 const funnelData = [
   { date: '7/1', newLeads: 12, valid: 8, deal: 1 },
@@ -76,7 +85,16 @@ export default function AcquisitionPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEmailConfig, setShowEmailConfig] = useState(false);
   const [editingLead, setEditingLead] = useState<typeof leads[0] | null>(null);
+  const [emailConfig, setEmailConfig] = useState({
+    smtpHost: '',
+    smtpPort: '587',
+    smtpUser: '',
+    smtpPass: '',
+    fromName: '钰美固',
+    fromEmail: '',
+  });
 
   const sidebarItems: { id: TabId; icon: React.ReactNode; label: string; badge?: number; badgeColor?: string }[] = [
     { id: 'dashboard', icon: <TrendingUp size={18} />, label: '数据总览' },
@@ -89,6 +107,7 @@ export default function AcquisitionPage() {
     { id: 'analytics', icon: <PieIcon size={18} />, label: '转化分析' },
     { id: 'reports', icon: <BarChart3 size={18} />, label: '数据报表' },
     { id: 'agent', icon: <Brain size={18} />, label: 'Agent总控台', badge: 6, badgeColor: 'bg-purple-500' },
+    { id: 'settings', icon: <Settings size={18} />, label: '邮件配置' },
   ];
 
   const getScoreClass = (score: number) => {
@@ -180,6 +199,48 @@ export default function AcquisitionPage() {
           {activeTab === 'analytics' && <AnalyticsTab />}
           {activeTab === 'reports' && <ReportsTab />}
           {activeTab === 'agent' && <AgentTab />}
+          {activeTab === 'settings' && (
+            <div className="p-6">
+              <h2 className="text-2xl font-bold mb-6">系统设置</h2>
+              <div className="grid gap-6">
+                <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">邮件服务配置</h3>
+                      <p className="text-sm text-slate-400 mt-1">配置 SMTP 服务器以发送邮件</p>
+                    </div>
+                    <button
+                      onClick={() => setShowEmailConfig(true)}
+                      className="px-4 py-2 bg-amber-500 text-slate-900 rounded-lg font-semibold hover:bg-amber-600 transition"
+                    >
+                      配置
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <div className={`w-2 h-2 rounded-full ${emailConfig.smtpHost ? 'bg-emerald-500' : 'bg-slate-600'}`}></div>
+                    {emailConfig.smtpHost ? '已配置' : '未配置'}
+                  </div>
+                </div>
+                <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                  <h3 className="text-lg font-semibold text-white mb-4">数据统计</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-amber-500">156</p>
+                      <p className="text-sm text-slate-400">总线索数</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-emerald-500">23</p>
+                      <p className="text-sm text-slate-400">高意向线索</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-500">20</p>
+                      <p className="text-sm text-slate-400">已成交</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
@@ -304,6 +365,90 @@ export default function AcquisitionPage() {
               <div className="flex gap-3 pt-4">
                 <button onClick={() => setShowAddModal(false)} className="flex-1 rounded-lg border border-slate-700 py-2 font-semibold text-white hover:bg-slate-700 transition">取消</button>
                 <button onClick={() => setShowAddModal(false)} className="flex-1 rounded-lg bg-amber-500 py-2 font-semibold text-slate-900 hover:bg-amber-600 transition">创建</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Config Modal */}
+      {showEmailConfig && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowEmailConfig(false)}>
+          <div className="w-full max-w-lg rounded-2xl bg-slate-800 p-6 shadow-2xl border border-slate-700" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">邮件服务配置</h2>
+              <button onClick={() => setShowEmailConfig(false)} className="text-slate-400 hover:text-white"><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">SMTP 服务器</label>
+                <input
+                  type="text"
+                  value={emailConfig.smtpHost}
+                  onChange={e => setEmailConfig({...emailConfig, smtpHost: e.target.value})}
+                  placeholder="smtp.example.com"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">SMTP 端口</label>
+                <input
+                  type="text"
+                  value={emailConfig.smtpPort}
+                  onChange={e => setEmailConfig({...emailConfig, smtpPort: e.target.value})}
+                  placeholder="587"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">邮箱账号</label>
+                <input
+                  type="email"
+                  value={emailConfig.smtpUser}
+                  onChange={e => setEmailConfig({...emailConfig, smtpUser: e.target.value})}
+                  placeholder="your@email.com"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">邮箱密码/授权码</label>
+                <input
+                  type="password"
+                  value={emailConfig.smtpPass}
+                  onChange={e => setEmailConfig({...emailConfig, smtpPass: e.target.value})}
+                  placeholder="输入密码或授权码"
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-slate-400 mb-1">发件人名称</label>
+                  <input
+                    type="text"
+                    value={emailConfig.fromName}
+                    onChange={e => setEmailConfig({...emailConfig, fromName: e.target.value})}
+                    placeholder="钰美固"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-400 mb-1">发件邮箱</label>
+                  <input
+                    type="email"
+                    value={emailConfig.fromEmail}
+                    onChange={e => setEmailConfig({...emailConfig, fromEmail: e.target.value})}
+                    placeholder="sales@yumeigu.com"
+                    className="w-full rounded-lg border border-slate-700 bg-slate-900 px-4 py-2 text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+                <p className="text-xs text-slate-400 mb-1">💡 提示</p>
+                <p className="text-xs text-slate-500">推荐使用阿里云邮件推送、SendGrid 或 QQ/163 邮箱 SMTP 服务。如果使用 QQ/163 邮箱，请使用授权码而非登录密码。</p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setShowEmailConfig(false)} className="flex-1 rounded-lg border border-slate-700 py-2 font-semibold text-white hover:bg-slate-700 transition">取消</button>
+                <button onClick={() => { setShowEmailConfig(false); alert('邮件配置已保存'); }} className="flex-1 rounded-lg bg-amber-500 py-2 font-semibold text-slate-900 hover:bg-amber-600 transition">保存配置</button>
               </div>
             </div>
           </div>
