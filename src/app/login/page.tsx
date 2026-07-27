@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseConfig } from '@/lib/supabase-config-inject';
 import { getSupabaseBrowserClientWithRetry } from '@/lib/supabase-browser';
-import Image from 'next/image';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoading, error: configError } = useSupabaseConfig();
@@ -264,5 +263,17 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
+        <div className="text-amber-600 text-lg">加载中...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
