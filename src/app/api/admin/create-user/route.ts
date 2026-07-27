@@ -5,7 +5,10 @@ const ALLOWED_DOMAIN = 'yumeigu.com';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, full_name, role } = await request.json();
+    const body = await request.json();
+    const email = body.email;
+    const full_name = body.full_name || body.fullName;
+    const password = body.password;
 
     if (!email || !full_name) {
       return NextResponse.json({ error: '邮箱和姓名不能为空' }, { status: 400 });
@@ -33,8 +36,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '该邮箱已注册' }, { status: 400 });
     }
 
-    // 生成随机密码
-    const tempPassword = Math.random().toString(36).slice(-10) + 'A1!';
+    // 使用表单密码或生成随机密码
+    const tempPassword = password || (Math.random().toString(36).slice(-10) + 'A1!');
 
     // 创建用户
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
       user_id: newUser.user.id,
       email,
       full_name,
-      role: role || 'user',
+      role: 'user',
     });
 
     if (roleError) {
@@ -68,7 +71,7 @@ export async function POST(request: NextRequest) {
       data: {
         email,
         full_name,
-        role: role || 'user',
+        role: 'user',
         temp_password: tempPassword,
       },
     });
