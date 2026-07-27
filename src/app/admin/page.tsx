@@ -121,6 +121,65 @@ export default function AdminPage() {
     count: agents.filter((a) => a.category === cat.id).length,
   }));
 
+  // Employee management
+  const [activeTab, setActiveTab] = useState<'agents' | 'employees'>('agents');
+  const [employees, setEmployees] = useState<{ id: string; email: string; fullName: string; role: string; createdAt: string }[]>([]);
+  const [showCreateEmployee, setShowCreateEmployee] = useState(false);
+  const [empForm, setEmpForm] = useState({ email: '', fullName: '', password: '' });
+  const [empLoading, setEmpLoading] = useState(false);
+  const [empMsg, setEmpMsg] = useState('');
+
+  useEffect(() => {
+    if (activeTab === 'employees') loadEmployees();
+  }, [activeTab]);
+
+  const loadEmployees = async () => {
+    try {
+      const res = await fetch('/api/users');
+      if (res.ok) {
+        const data = await res.json();
+        setEmployees(data.users || []);
+      }
+    } catch {}
+  };
+
+  const handleCreateEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!empForm.email.endsWith('@yumeigu.com')) {
+      setEmpMsg('只能使用 @yumeigu.com 邮箱');
+      return;
+    }
+    setEmpLoading(true);
+    setEmpMsg('');
+    try {
+      const res = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(empForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEmpMsg('创建成功！');
+        setEmpForm({ email: '', fullName: '', password: '' });
+        setShowCreateEmployee(false);
+        loadEmployees();
+      } else {
+        setEmpMsg(data.error || '创建失败');
+      }
+    } catch {
+      setEmpMsg('网络错误');
+    }
+    setEmpLoading(false);
+  };
+
+  const handleDeleteEmployee = async (userId: string, email: string) => {
+    if (!confirm(`确定删除员工 ${email} 吗？`)) return;
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      if (res.ok) loadEmployees();
+    } catch {}
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
@@ -132,20 +191,50 @@ export default function AdminPage() {
               管理后台
             </h1>
             <p className="mt-1.5 text-sm text-slate-500">
-              管理平台智能体，查看使用数据
+              管理平台智能体和员工账号
             </p>
           </div>
+          {activeTab === 'agents' ? (
+            <button
+              onClick={openCreate}
+              className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-600"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              新建智能体
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowCreateEmployee(true)}
+              className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-600"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              创建员工账号
+            </button>
+          )}
+        </div>
+
+        {/* Tabs */}
+        <div className="mb-6 flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
           <button
-            onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-amber-600"
+            onClick={() => setActiveTab('agents')}
+            className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'agents' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
           >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            新建智能体
+            智能体管理
+          </button>
+          <button
+            onClick={() => setActiveTab('employees')}
+            className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'employees' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            员工管理
           </button>
         </div>
 
+        {activeTab === 'agents' ? (
+        <>
         {/* Stats Cards */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -270,6 +359,41 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+        </>
+        ) : (
+        /* Employees Section */
+        <div className="rounded-xl border border-slate-100 bg-white shadow-sm">
+          <div className="border-b border-slate-100 px-6 py-4">
+            <h2 className="text-base font-semibold text-slate-900">员工列表</h2>
+          </div>
+          {employees.length > 0 ? (
+            <div className="divide-y divide-slate-50">
+              {employees.map((emp) => (
+                <div key={emp.id} className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-slate-50/50">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-semibold text-amber-700">
+                    {(emp.fullName || emp.email)[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="truncate text-sm font-semibold text-slate-900">{emp.fullName || emp.email}</h3>
+                      <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${emp.role === 'admin' ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-500'}`}>
+                        {emp.role === 'admin' ? '管理员' : '员工'}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-slate-500">{emp.email}</p>
+                  </div>
+                  <div className="text-xs text-slate-400">{emp.createdAt}</div>
+                  {emp.role !== 'admin' && (
+                    <button onClick={() => handleDeleteEmployee(emp.id, emp.email)} className="rounded-lg px-3 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600">删除</button>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center text-sm text-slate-400">暂无员工，点击上方按钮创建</div>
+          )}
+        </div>
+        )}
       </main>
 
       {/* Modal */}
@@ -405,6 +529,40 @@ export default function AdminPage() {
                 >
                   {modalMode === 'create' ? '创建' : '保存'}
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create Employee Modal */}
+      {showCreateEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-900">创建员工账号</h2>
+              <button onClick={() => { setShowCreateEmployee(false); setEmpMsg(''); }} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <form onSubmit={handleCreateEmployee} className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">邮箱 <span className="text-red-500">*</span></label>
+                <input type="email" value={empForm.email} onChange={(e) => setEmpForm((f) => ({ ...f, email: e.target.value }))} placeholder="employee@yumeigu.com" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10" required />
+                <p className="mt-1 text-xs text-slate-400">只能使用 @yumeigu.com 邮箱</p>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">姓名</label>
+                <input type="text" value={empForm.fullName} onChange={(e) => setEmpForm((f) => ({ ...f, fullName: e.target.value }))} placeholder="员工姓名" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10" />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700">初始密码 <span className="text-red-500">*</span></label>
+                <input type="password" value={empForm.password} onChange={(e) => setEmpForm((f) => ({ ...f, password: e.target.value }))} placeholder="至少6位" className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10" required minLength={6} />
+              </div>
+              {empMsg && <p className={`text-sm ${empMsg.includes('成功') ? 'text-emerald-600' : 'text-red-500'}`}>{empMsg}</p>}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onClick={() => { setShowCreateEmployee(false); setEmpMsg(''); }} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50">取消</button>
+                <button type="submit" disabled={empLoading} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50">{empLoading ? '创建中...' : '创建'}</button>
               </div>
             </form>
           </div>

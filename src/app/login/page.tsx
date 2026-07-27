@@ -5,14 +5,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabaseConfig } from '@/lib/supabase-config-inject';
 import { getSupabaseBrowserClientWithRetry } from '@/lib/supabase-browser';
 
+const ALLOWED_DOMAIN = 'yumeigu.com';
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoading, error: configError } = useSupabaseConfig();
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -43,91 +43,36 @@ function LoginForm() {
     try {
       const supabase = await getSupabaseBrowserClientWithRetry();
 
-      if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) {
-          setMessageType('error');
-          if (error.message.includes('Invalid login credentials')) {
-            setMessage('邮箱或密码错误');
-          } else if (error.message.includes('Email not confirmed')) {
-            setMessage('邮箱未验证，请查收验证邮件');
-          } else {
-            setMessage(error.message);
-          }
-          return;
-        }
-
-        if (data.session && data.user) {
-          // 确保 user_roles 中有记录（登录时补录）
-          await supabase.from('user_roles').upsert(
-            {
-              user_id: data.user.id,
-              email: data.user.email || email,
-              full_name: data.user.user_metadata?.full_name || email.split('@')[0],
-            },
-            { onConflict: 'user_id', ignoreDuplicates: false }
-          );
-
-          const redirect = searchParams.get('redirect') || '/';
-          router.push(redirect);
-        }
-      } else {
-        if (password !== confirmPassword) {
-          setMessageType('error');
-          setMessage('两次输入的密码不一致');
-          setLoading(false);
-          return;
-        }
-
-        if (password.length < 6) {
-          setMessageType('error');
-          setMessage('密码长度不能少于 6 位');
-          setLoading(false);
-          return;
-        }
-
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              full_name: email.split('@')[0],
-            },
-          },
-        });
-
-        if (error) {
-          setMessageType('error');
-          if (error.message.includes('already registered')) {
-            setMessage('该邮箱已注册，请直接登录');
-          } else {
-            setMessage(error.message);
-          }
-          return;
-        }
-
-        if (data.session && data.user) {
-          // 注册成功，自动创建 user_roles 记录
-          // 触发器 auto_set_first_admin 会自动将第一个用户设为 admin
-          await supabase.from('user_roles').upsert(
-            {
-              user_id: data.user.id,
-              email: data.user.email || email,
-              full_name: email.split('@')[0],
-            },
-            { onConflict: 'user_id' }
-          );
-
-          const redirect = searchParams.get('redirect') || '/';
-          router.push(redirect);
+      if (error) {
+        setMessageType('error');
+        if (error.message.includes('Invalid login credentials')) {
+          setMessage('邮箱或密码错误');
+        } else if (error.message.includes('Email not confirmed')) {
+          setMessage('邮箱未验证，请联系管理员');
         } else {
-          setMessageType('success');
-          setMessage('注册成功，请查收验证邮件后登录');
+          setMessage(error.message);
         }
+        return;
+      }
+
+      if (data.session && data.user) {
+        // 确保 user_roles 中有记录（登录时补录）
+        await supabase.from('user_roles').upsert(
+          {
+            user_id: data.user.id,
+            email: data.user.email || email,
+            full_name: data.user.user_metadata?.full_name || email.split('@')[0],
+          },
+          { onConflict: 'user_id', ignoreDuplicates: false }
+        );
+
+        const redirect = searchParams.get('redirect') || '/';
+        router.push(redirect);
       }
     } catch (err) {
       setMessageType('error');
@@ -170,7 +115,7 @@ function LoginForm() {
         {/* Login Form */}
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-xl font-semibold text-slate-800 mb-6 text-center">
-            {isLogin ? '登录账号' : '注册账号'}
+            登录账号
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -180,7 +125,7 @@ function LoginForm() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@company.com"
+                placeholder={`your@${ALLOWED_DOMAIN}`}
                 required
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
               />
@@ -193,7 +138,7 @@ function LoginForm() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="至少 6 位"
+                  placeholder="请输入密码"
                   required
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all pr-12"
                 />
@@ -216,20 +161,6 @@ function LoginForm() {
               </div>
             </div>
 
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">确认密码</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="再次输入密码"
-                  required
-                  className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                />
-              </div>
-            )}
-
             {message && (
               <div className={`text-sm px-3 py-2 rounded-lg ${messageType === 'error' ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
                 {message}
@@ -241,20 +172,14 @@ function LoginForm() {
               disabled={loading}
               className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium rounded-lg hover:from-amber-600 hover:to-amber-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
-              {loading ? '处理中...' : isLogin ? '登录' : '注册'}
+              {loading ? '登录中...' : '登录'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setMessage('');
-              }}
-              className="text-sm text-amber-600 hover:text-amber-700 font-medium"
-            >
-              {isLogin ? '还没有账号？去注册' : '已有账号？去登录'}
-            </button>
+            <p className="text-sm text-slate-500">
+              没有账号？请联系管理员开通
+            </p>
           </div>
         </div>
 
