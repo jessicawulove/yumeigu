@@ -42,12 +42,13 @@ export async function getServerUser() {
 export async function getUserRole(userId: string): Promise<'admin' | 'user'> {
   try {
     const supabase = await createSupabaseServerClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .single();
-    return (data?.role as 'admin' | 'user') || 'user';
+      .maybeSingle();
+    if (error || !data) return 'user';
+    return (data.role as 'admin' | 'user') || 'user';
   } catch {
     return 'user';
   }
